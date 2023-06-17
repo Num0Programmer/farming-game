@@ -7,7 +7,7 @@ use character::Character;
 async fn main()
 {
     let p_texture = load_texture("assets/place_holder.png").await.unwrap();
-    let mut player = Character::new(p_texture);
+    let mut player = Character::new(120.0, p_texture);
 
     loop // game loop
     {
