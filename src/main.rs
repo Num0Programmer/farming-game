@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-pub mod character;
+pub mod characters;
 use characters::Player;
 
 #[macroquad::main("Farming Game")]
