@@ -1,14 +1,27 @@
 use macroquad::prelude::*;
 
+pub mod character;
+use character::Character;
+
 #[macroquad::main("Farming Game")]
 async fn main()
 {
+    let p_texture = load_texture("assets/place_holder.png").await.unwrap();
+    let mut player = Character::new(p_texture);
+
     loop // game loop
     {
+        if is_key_pressed(KeyCode::Escape)
+        {
+            break;
+        }
+
         clear_background(BLUE);
 
-        draw_text("HELLO!", 20.0, 150.0, 250.0, WHITE);
+        player.update(get_frame_time());
+        player.render();
 
         next_frame().await
     }
 }
+
