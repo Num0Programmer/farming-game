@@ -3,8 +3,8 @@ use macroquad::prelude::Vec2;
 use macroquad::texture::*;
 use macroquad::window::*;
 
-const CROP_ROWS: i32 = 1;
-const CROPS_PER_ROW: i32 = 10;
+const CROP_ROWS: i32 = 4;
+const CROPS_PER_ROW: i32 = 5;
 
 /// structure which represents places on the ground crops can be planted
 // TODO: might need to do something about the planter not know which crop the
@@ -30,21 +30,21 @@ impl CropGrid
 
     pub fn render(&self)
     {
-        let mut x = (self.pos.x / CROPS_PER_ROW as f32) - (self.texture.width() / 2.0);
-        let mut y = ((self.pos.y - (self.texture.height() / 2.0) - (screen_height() / 2.0)) + self.screen_partition.y) / 2.0;
+        let x_init = (self.pos.x / CROPS_PER_ROW as f32)
+            - (self.texture.width() / 2.0) - 2.0;
+        let mut y = (self.pos.y / CROP_ROWS as f32)
+            - (self.texture.height() / 2.0);
 
         for _row in 0..CROP_ROWS
         {
+            // reset x coordinate of next column
+            let mut x = x_init;
             for _col in 0..CROPS_PER_ROW
             {
-                draw_texture(
-                    self.texture,
-                    x,
-                    0.0,
-                    WHITE
-                );
+                draw_texture(self.texture, x, y, WHITE);
                 x += self.screen_partition.x;
             }
+            y += self.screen_partition.y;
         }
     }
 }
