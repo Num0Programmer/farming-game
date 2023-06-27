@@ -13,7 +13,7 @@ async fn main()
     let player_texture = load_texture("assets/place_holder.png").await.unwrap();
 
     let mut player = Player::new(120.0, player_texture);
-    let crop_grid = CropGrid::new(50.0, 60.0, dirt_texture);
+    let crop_grid = CropGrid::new(screen_width() / 2.0, screen_height() / 2.0, dirt_texture);
 
     loop // game loop
     {
