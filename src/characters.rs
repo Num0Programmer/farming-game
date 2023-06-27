@@ -41,7 +41,9 @@ impl Player
 
     pub fn render(&self)
     {
-        draw_texture(self.texture, self.pos.x, self.pos.y, WHITE);
+        let x = self.pos.x - (self.texture.width() / 2.0);
+        let y = self.pos.y - (self.texture.height() / 2.0);
+        draw_texture(self.texture, x, y, WHITE);
     }
 }
 
