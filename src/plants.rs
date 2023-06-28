@@ -34,13 +34,14 @@ pub struct CropGrid
 {
     pos: Vec2,
     screen_partition: Vec2,
-    texture: Texture2D,
+    dry_t: Texture2D,
+    watered_t: Texture2D,
     crops: Vec<CropGridCell>
 }
 
 impl CropGrid
 {
-    pub fn new(x: f32, y: f32, texture: Texture2D) -> Self
+    pub fn new(x: f32, y: f32, dry_t: Texture2D, watered_t: Texture2D) -> Self
     {
         let area = CROP_ROWS * CROPS_PER_ROW;
         let pos = Vec2::new(x, y);
@@ -53,9 +54,9 @@ impl CropGrid
         // initialize crops
         {
             let x_init = (pos.x / CROPS_PER_ROW as f32)
-                - (texture.width() / 2.0) - 2.0;
+                - (SPRITE_DIM / 2.0) - 2.0;
             let mut y = (pos.y / CROP_ROWS as f32)
-                - (texture.height() / 2.0);
+                - (SPRITE_DIM / 2.0);
 
             for _row in 0..CROP_ROWS
             {
@@ -77,7 +78,7 @@ impl CropGrid
             }
         }
 
-        Self { pos, screen_partition, texture, crops }
+        Self { pos, screen_partition, dry_t, watered_t, crops }
     }
 
     pub fn render(&self)
@@ -87,7 +88,7 @@ impl CropGrid
             if !crop.has_water
             {
                 draw_texture(
-                    self.texture,
+                    self.dry_t,
                     crop.pos.x,
                     crop.pos.y,
                     WHITE
@@ -95,7 +96,12 @@ impl CropGrid
             }
             else
             {
-                panic!("No textured for a watered crop!\n");
+                draw_texture(
+                    self.watered_t,
+                    crop.pos.x,
+                    crop.pos.y,
+                    WHITE
+                );
             }
         }
     }
@@ -107,19 +113,19 @@ pub struct Plant
     grown: bool,
     name: String,
     grow_t: f32,
-    seed_texture: Texture2D,
-    plant_texture: Texture2D
+    seed_t: Texture2D,
+    plant_t: Texture2D
 }
 
 impl Plant
 {
     pub fn new(
         name: String, grow_t: f32,
-        seed_texture: Texture2D,
-        plant_texture: Texture2D
+        seed_t: Texture2D,
+        plant_t: Texture2D
     ) -> Self
     {
-        Self { grown: false, name, grow_t, seed_texture, plant_texture }
+        Self { grown: false, name, grow_t, seed_t, plant_t }
     }
 }
 
