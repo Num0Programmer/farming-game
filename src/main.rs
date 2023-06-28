@@ -14,7 +14,7 @@ async fn main()
     let player_texture = load_texture("assets/place_holder.png").await.unwrap();
 
     let mut player = Player::new(120.0, player_texture);
-    let crop_grid = CropGrid::new(screen_width() / 2.0, screen_height() / 2.0, dirt_t, watered_t);
+    let mut crop_grid = CropGrid::new(screen_width() / 2.0, screen_height() / 2.0, dirt_t, watered_t);
 
     loop // game loop
     {
@@ -26,6 +26,7 @@ async fn main()
         clear_background(BLUE);
 
         // update entities
+        crop_grid.update(get_frame_time());
         player.update(get_frame_time());
 
         // draw entities to screen
