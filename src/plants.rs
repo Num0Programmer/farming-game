@@ -29,7 +29,12 @@ impl CropGridCell
 
     fn update(&mut self, dt: f32)
     {
-        self.water_level -= dt;
+        if self.has_plant
+        {
+            self.water_level -= self.plant.water_usage;
+            self.plant.update(dt);
+        }
+
         if self.water_level <= 0.0
         {
             self.water_level = 0.0;
@@ -45,13 +50,17 @@ impl CropGridCell
     {
     }
 
-    fn set_plant(&mut self, other: Plant)
+    fn render(&self)
     {
-    }
-
-    fn set_water_level(&mut self, level: f32)
-    {
-        self.has_water = true;
+        if self.has_plant && self.plant.grown
+        {
+            draw_texture(
+                self.plant.plant_t,
+                self.pos.x,
+                self.pos.y,
+                WHITE
+            );
+        }
     }
 }
 
@@ -173,30 +182,22 @@ impl Plant
 
     fn update(&mut self, dt: f32)
     {
+        self.grow_time -= dt;
+        if self.grow_time <= 0.0
+        {
+            self.grow_time = 0.0;
+            self.grown = true;
+        }
     }
 
-    fn set_grown(&mut self, b: bool)
+    fn set_plant(&mut self, plant: Plant)
     {
-    }
-
-    fn set_name(&mut self, name: String)
-    {
-    }
-
-    fn set_grow_time(&mut self, gt: f32)
-    {
-    }
-
-    fn set_water_usage(&mut self, usage: f32)
-    {
-    }
-
-    fn set_seed_texture(&mut self, st: Texture2D)
-    {
-    }
-
-    fn set_plant_texture(&mut self, pt: Texture2D)
-    {
+        self.grown = plant.grown;
+        self.name = plant.name;
+        self.grow_time = plant.grow_time;
+        self.water_usage = plant.water_usage;
+        self.seed_t = plant.seed_t;
+        self.plant_t = plant.plant_t;
     }
 }
 
