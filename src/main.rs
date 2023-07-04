@@ -27,6 +27,11 @@ async fn main()
 
         clear_background(BLUE);
 
+        if is_key_pressed(KeyCode::Key1)
+        {
+            crop_grid.plant_to_cell(&potato, player.get_rect());
+        }
+
         // update entities
         crop_grid.update(get_frame_time());
         player.update(get_frame_time());

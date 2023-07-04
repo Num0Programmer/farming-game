@@ -1,11 +1,13 @@
 use macroquad::color::WHITE;
-use macroquad::input::*;
+use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
+use macroquad::input::*;
 use macroquad::texture::*;
 
 pub struct Player
 {
     pos: Vec2,
+    rect: Rect,
     speed: f32,
     texture: Texture2D
 }
@@ -15,8 +17,9 @@ impl Player
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
         let pos = Vec2::new(150.0, 150.0);
+        let rect = Rect::new(150.0, 150.0, 32.0, 32.0);
 
-        Self { pos, speed, texture }
+        Self { pos, rect, speed, texture }
     }
 
     pub fn update(&mut self, dt: f32)
@@ -37,6 +40,9 @@ impl Player
 
         self.pos.x += input_vec.x * self.speed * dt;
         self.pos.y += input_vec.y * self.speed * dt;
+
+        self.rect.x = self.pos.x;
+        self.rect.y = self.pos.y;
     }
 
     pub fn render(&self)
@@ -44,6 +50,11 @@ impl Player
         let x = self.pos.x - (self.texture.width() / 2.0);
         let y = self.pos.y - (self.texture.height() / 2.0);
         draw_texture(self.texture, x, y, WHITE);
+    }
+
+    pub fn get_rect(&self) -> Rect
+    {
+        Rect::new(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
     }
 }
 

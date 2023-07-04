@@ -1,4 +1,5 @@
-use macroquad::color::WHITE; use macroquad::prelude::Rect;
+use macroquad::color::WHITE;
+use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
 use macroquad::texture::*;
 use macroquad::window::*;
@@ -42,8 +43,10 @@ impl CropGridCell
         }
     }
 
-    pub fn plant(&mut self, plant: Plant)
+    pub fn plant(&mut self, plant: &Plant)
     {
+        self.plant.set_plant(&plant);
+        self.has_plant = true;
     }
 
     pub fn pull(&mut self)
@@ -109,6 +112,24 @@ impl CropGrid
         Self { pos, screen_partition, dry_t, watered_t, crops }
     }
 
+    pub fn plant_to_cell(&mut self, plant: &Plant, query: Rect)
+    {
+        for i in 0..self.crops.len()
+        {
+            let intersect = match self.crops[i].rect.intersect(query)
+            {
+                Some(intersect) => intersect,
+                None => continue
+            };
+
+            if intersect.ne(&Rect::default())
+            {
+                let crop = &mut self.crops[i];
+                crop.plant(plant)
+            }
+        }
+    }
+
     pub fn update(&mut self, dt: f32)
     {
         for i in 0..self.crops.len()
@@ -139,6 +160,8 @@ impl CropGrid
                     WHITE
                 );
             }
+
+            crop.render();
         }
     }
 }
@@ -190,10 +213,10 @@ impl Plant
         }
     }
 
-    fn set_plant(&mut self, plant: Plant)
+    fn set_plant(&mut self, plant: &Plant)
     {
         self.grown = plant.grown;
-        self.name = plant.name;
+        self.name = plant.name.clone();
         self.grow_time = plant.grow_time;
         self.water_usage = plant.water_usage;
         self.seed_t = plant.seed_t;
