@@ -28,10 +28,14 @@ async fn main()
 
         clear_background(BLUE);
 
-        // TODO: add a way to change plants - seeds?
         if is_key_pressed(KeyCode::J)
         {
             crop_grid.plant_to_cell(&potato, player.get_rect());
+        }
+        else if is_key_pressed(KeyCode::K)
+        {
+            crop_grid.harvest_from_cell(player.get_rect(), &mut score);
+            println!("Score: {}", score);
         }
 
         // update entities
