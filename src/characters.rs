@@ -1,8 +1,11 @@
 use macroquad::color::WHITE;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
+use macroquad::shapes::draw_rectangle;
 use macroquad::input::*;
 use macroquad::texture::*;
+
+const REACH: f32 = 50.0;
 
 pub struct Player
 {
@@ -17,7 +20,7 @@ impl Player
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
         let pos = Vec2::new(150.0, 150.0);
-        let rect = Rect::new(150.0, 150.0, 32.0, 32.0);
+        let rect = Rect::new(pos.x, pos.y, REACH, REACH);
 
         Self { pos, rect, speed, texture }
     }
@@ -41,8 +44,8 @@ impl Player
         self.pos.x += input_vec.x * self.speed * dt;
         self.pos.y += input_vec.y * self.speed * dt;
 
-        self.rect.x = self.pos.x;
-        self.rect.y = self.pos.y;
+        self.rect.x = self.pos.x - (REACH / 2.0);
+        self.rect.y = self.pos.y - (REACH / 2.0);
     }
 
     pub fn render(&self)

@@ -16,7 +16,7 @@ async fn main()
 
     let mut player = Player::new(120.0, player_texture);
     let mut crop_grid = CropGrid::new(screen_width() / 2.0, screen_height() / 2.0, dirt_t, watered_t);
-    let potato = Plant::new("Potato".to_string(), 0.0, 0.0, Texture2D::empty(), potato_texture);
+    let potato = Plant::new("Potato".to_string(), 0.5, 0.1, Texture2D::empty(), potato_texture);
 
     loop // game loop
     {
