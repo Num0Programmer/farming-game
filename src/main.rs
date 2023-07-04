@@ -9,6 +9,7 @@ use plants::*;
 #[macroquad::main("Farming Game")]
 async fn main()
 {
+    let mut score = 0;
     let dirt_t = load_texture("assets/dirt.png").await.unwrap();
     let watered_t = load_texture("assets/watered_dirt.png").await.unwrap();
     let player_texture = load_texture("assets/place_holder.png").await.unwrap();
@@ -27,7 +28,8 @@ async fn main()
 
         clear_background(BLUE);
 
-        if is_key_pressed(KeyCode::Key1)
+        // TODO: add a way to change plants - seeds?
+        if is_key_pressed(KeyCode::J)
         {
             crop_grid.plant_to_cell(&potato, player.get_rect());
         }
