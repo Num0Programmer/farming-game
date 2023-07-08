@@ -28,14 +28,19 @@ async fn main()
 
     // init plants
     let potato = Plant::new(
-        "Potato".to_string(), 5.0, 4.0,
+        "Potato".to_string(), 12.0, 4.0,
         Texture2D::empty(),
         load_texture("assets/potato.png").await.unwrap()
     );
     let carrot = Plant::new(
-        "Carrot".to_string(), 3.0, 2.0,
+        "Carrot".to_string(), 10.0, 7.0,
         Texture2D::empty(),
         load_texture("assets/carrot.png").await.unwrap()
+    );
+    let beet = Plant::new(
+        "Beet".to_string(), 12.0, 2.0,
+        Texture2D::empty(),
+        load_texture("assets/beet.png").await.unwrap()
     );
 
     let mut selected_plant = &potato;
@@ -57,6 +62,11 @@ async fn main()
         else if is_key_pressed(KeyCode::Key2)
         {
             selected_plant = &carrot;
+        }
+        // otherwise, check for beet select
+        else if is_key_pressed(KeyCode::Key3)
+        {
+            selected_plant = &beet;
         }
 
         // check for plant button
