@@ -43,7 +43,7 @@ impl CropGridCell
         }
     }
 
-    pub fn plant(&mut self, plant: &Plant)
+    fn plant(&mut self, plant: &Plant)
     {
         if !self.has_plant
         {
@@ -52,12 +52,12 @@ impl CropGridCell
         }
     }
 
-    pub fn harvest(&mut self, score: &mut i32)
+    fn harvest(&mut self, score: &mut i32)
     {
         if self.has_plant
         {
             self.plant.set_plant(&Plant::default());
-            self.has_plant = true;
+            self.has_plant = false;
 
             *score += 10;
         }
@@ -77,6 +77,15 @@ impl CropGridCell
                 self.pos.y,
                 WHITE
             );
+        }
+    }
+
+    fn water(&mut self, portion: f32)
+    {
+        if !self.has_water
+        {
+            self.water_level = portion;
+            self.has_water = true;
         }
     }
 }
@@ -171,6 +180,18 @@ impl CropGrid
         {
             let crop = &mut self.crops[crop_index as usize];
             crop.plant(plant)
+        }
+    }
+
+    pub fn water_cell(&mut self, query: Rect, portion: f32)
+    {
+        let mut crop_index: i32 = -1;
+        let intersect = self.check_for_intersect(&mut crop_index, query);
+
+        if crop_index > -1
+        {
+            let crop = &mut self.crops[crop_index as usize];
+            crop.water(portion);
         }
     }
 
