@@ -25,14 +25,14 @@ impl CropGridCell
     fn new(pos: Vec2, plant: Plant) -> Self
     {
         let rect = Rect::new(pos.x, pos.y, SPRITE_DIM, SPRITE_DIM);
-        Self { has_water: true, has_plant: false, pos, rect, water_level: 10.0, plant }
+        Self { has_water: true, has_plant: false, pos, rect, water_level: 0.0, plant }
     }
 
     fn update(&mut self, dt: f32)
     {
-        if self.has_plant
+        if self.has_plant && !self.plant.grown && self.water_level > 0.0
         {
-            self.water_level -= self.plant.water_usage;
+            self.water_level -= self.plant.water_usage * dt;
             self.plant.update(dt);
         }
 
@@ -54,7 +54,7 @@ impl CropGridCell
 
     fn harvest(&mut self, score: &mut i32)
     {
-        if self.has_plant
+        if self.has_plant && self.plant.grown
         {
             self.plant.set_plant(&Plant::default());
             self.has_plant = false;

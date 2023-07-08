@@ -10,7 +10,7 @@ impl WaterCan
 {
     pub fn new() -> Self
     {
-        let portion = 10.0;
+        let portion = 50.0;
         let portions_left = DEFAULT_CAPACITY;
 
         Self { portion, portions_left }

@@ -12,17 +12,33 @@ use tools::*;
 #[macroquad::main("Farming Game")]
 async fn main()
 {
+    // init game management
     let mut score = 0;
-    let dirt_t = load_texture("assets/dirt.png").await.unwrap();
-    let watered_t = load_texture("assets/watered_dirt.png").await.unwrap();
-    let player_texture = load_texture("assets/place_holder.png").await.unwrap();
-    let potato_texture = load_texture("assets/potato.png").await.unwrap();
+    let mut crop_grid = CropGrid::new(
+        screen_width() / 2.0, screen_height() / 2.0,
+        load_texture("assets/dirt.png").await.unwrap(),
+        load_texture("assets/watered_dirt.png").await.unwrap()
+    );
 
-    let mut player = Player::new(120.0, player_texture);
-    let mut crop_grid = CropGrid::new(screen_width() / 2.0, screen_height() / 2.0, dirt_t, watered_t);
+    // init player and tools
+    let mut player = Player::new(
+        120.0, load_texture("assets/place_holder.png").await.unwrap()
+    );
     let water_can = WaterCan::new();
-    let potato = Plant::new("Potato".to_string(), 0.5, 0.1, Texture2D::empty(), potato_texture);
 
+    // init plants
+    let potato = Plant::new(
+        "Potato".to_string(), 5.0, 4.0,
+        Texture2D::empty(),
+        load_texture("assets/potato.png").await.unwrap()
+    );
+    let carrot = Plant::new(
+        "Carrot".to_string(), 3.0, 2.0,
+        Texture2D::empty(),
+        load_texture("assets/carrot.png").await.unwrap()
+    );
+
+    let mut selected_plant = &potato;
     loop // game loop
     {
         if is_key_pressed(KeyCode::Escape)
@@ -32,10 +48,21 @@ async fn main()
 
         clear_background(BLUE);
 
+        // check for potato select
+        if is_key_pressed(KeyCode::Key1)
+        {
+            selected_plant = &potato;
+        }
+        // otherwise, check for carrot select
+        else if is_key_pressed(KeyCode::Key2)
+        {
+            selected_plant = &carrot;
+        }
+
         // check for plant button
         if is_key_pressed(KeyCode::J)
         {
-            crop_grid.plant_to_cell(&potato, player.get_rect());
+            crop_grid.plant_to_cell(selected_plant, player.get_rect());
         }
         // otherwise, check for harvest button
         else if is_key_pressed(KeyCode::K)
