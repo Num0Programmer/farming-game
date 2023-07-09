@@ -17,7 +17,8 @@ async fn main()
     let mut crop_grid = CropGrid::new(
         screen_width() / 2.0, screen_height() / 2.0,
         load_texture("assets/dirt.png").await.unwrap(),
-        load_texture("assets/watered_dirt.png").await.unwrap()
+        load_texture("assets/watered_dirt.png").await.unwrap(),
+        load_texture("assets/seedling.png").await.unwrap()
     );
 
     // init player and tools

@@ -17,15 +17,25 @@ struct CropGridCell
     pos: Vec2,
     rect: Rect,
     water_level: f32,
+    seeded_t: Texture2D,
     plant: Plant
 }
 
 impl CropGridCell
 {
-    fn new(pos: Vec2, plant: Plant) -> Self
+    fn new(pos: Vec2, seedling_t: Texture2D, plant: Plant) -> Self
     {
         let rect = Rect::new(pos.x, pos.y, SPRITE_DIM, SPRITE_DIM);
-        Self { has_water: true, has_plant: false, pos, rect, water_level: 0.0, plant }
+        Self
+        {
+            has_water: true,
+            has_plant: false,
+            pos,
+            rect,
+            water_level: 0.0,
+            seeded_t: seedling_t,
+            plant
+        }
     }
 
     fn update(&mut self, dt: f32)
@@ -69,12 +79,23 @@ impl CropGridCell
 
     fn render(&self)
     {
+        let offset = 10.0;
         if self.has_plant && self.plant.grown
         {
             draw_texture(
                 self.plant.plant_t,
                 self.pos.x,
-                self.pos.y - 10.0,
+                self.pos.y - offset,
+                WHITE
+            );
+        }
+        // otherwise, assume communication there is something in the cell
+        else if self.has_plant
+        {
+            draw_texture(
+                self.seeded_t,
+                self.pos.x,
+                self.pos.y - offset,
                 WHITE
             );
         }
@@ -102,7 +123,12 @@ pub struct CropGrid
 
 impl CropGrid
 {
-    pub fn new(x: f32, y: f32, dry_t: Texture2D, watered_t: Texture2D) -> Self
+    pub fn new(
+        x: f32, y: f32,
+        dry_t: Texture2D,
+        watered_t: Texture2D,
+        seedling_t: Texture2D
+    ) -> Self
     {
         let area = CROP_ROWS * CROPS_PER_ROW;
         let pos = Vec2::new(x, y);
@@ -125,7 +151,7 @@ impl CropGrid
                 for _col in 0..CROPS_PER_ROW
                 {
                     let pos = Vec2::new(x, y);
-                    crops.push(CropGridCell::new(pos, Plant::default()));
+                    crops.push(CropGridCell::new(pos, seedling_t, Plant::default()));
                     x += screen_partition.x;
                 }
                 y += screen_partition.y;
@@ -242,7 +268,7 @@ pub struct Plant
     name: String,
     grow_time: f32,
     water_usage: f32,
-    seed_t: Texture2D,
+    sprout_t: Texture2D, // for plants which sprout, then produce (i.e. tomatoes)
     plant_t: Texture2D
 }
 
@@ -252,11 +278,11 @@ impl Plant
         name: String,
         grow_time: f32,
         water_usage: f32,
-        seed_t: Texture2D,
+        sprout_t: Texture2D,
         plant_t: Texture2D
     ) -> Self
     {
-        Self { grown: false, name, grow_time, water_usage, seed_t, plant_t }
+        Self { grown: false, name, grow_time, water_usage, sprout_t, plant_t }
     }
 
     pub fn default() -> Self
@@ -267,7 +293,7 @@ impl Plant
             name: "".to_string(),
             grow_time: 0.0,
             water_usage: 0.0,
-            seed_t: Texture2D::empty(),
+            sprout_t: Texture2D::empty(),
             plant_t: Texture2D::empty()
         }
     }
@@ -288,7 +314,7 @@ impl Plant
         self.name = plant.name.clone();
         self.grow_time = plant.grow_time;
         self.water_usage = plant.water_usage;
-        self.seed_t = plant.seed_t;
+        self.sprout_t = plant.sprout_t;
         self.plant_t = plant.plant_t;
     }
 }
