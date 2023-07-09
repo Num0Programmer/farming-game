@@ -74,7 +74,7 @@ impl CropGridCell
             draw_texture(
                 self.plant.plant_t,
                 self.pos.x,
-                self.pos.y,
+                self.pos.y - 10.0,
                 WHITE
             );
         }
