@@ -74,10 +74,10 @@ async fn main()
         {
             crop_grid.plant_to_cell(selected_plant, player.get_rect());
         }
-        // otherwise, check for harvest button
+        // otherwise, check for pull button
         else if is_key_pressed(KeyCode::K)
         {
-            crop_grid.harvest_from_cell(player.get_rect(), &mut score);
+            crop_grid.pull_from_cell(player.get_rect(), &mut score);
             println!("Score: {}", score);
         }
         // otherwise, check for water button

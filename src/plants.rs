@@ -54,6 +54,10 @@ impl CropGridCell
 
     fn harvest(&mut self, score: &mut i32)
     {
+    }
+
+    fn pull(&mut self, score: &mut i32)
+    {
         if self.has_plant && self.plant.grown
         {
             self.plant.set_plant(&Plant::default());
@@ -61,10 +65,6 @@ impl CropGridCell
 
             *score += 10;
         }
-    }
-
-    pub fn pull(&mut self)
-    {
     }
 
     fn render(&self)
@@ -161,14 +161,6 @@ impl CropGrid
 
     pub fn harvest_from_cell(&mut self, query: Rect, score: &mut i32)
     {
-        let mut crop_index: i32 = -1;
-        let intersect = self.check_for_intersect(&mut crop_index, query);
-
-        if crop_index > -1
-        {
-            let crop = &mut self.crops[crop_index as usize];
-            crop.harvest(score);
-        }
     }
 
     pub fn plant_to_cell(&mut self, plant: &Plant, query: Rect)
@@ -180,6 +172,18 @@ impl CropGrid
         {
             let crop = &mut self.crops[crop_index as usize];
             crop.plant(plant)
+        }
+    }
+
+    pub fn pull_from_cell(&mut self, query: Rect, score: &mut i32)
+    {
+        let mut crop_index: i32 = -1;
+        let intersect = self.check_for_intersect(&mut crop_index, query);
+
+        if crop_index > -1
+        {
+            let crop = &mut self.crops[crop_index as usize];
+            crop.pull(score);
         }
     }
 
