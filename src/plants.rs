@@ -65,6 +65,13 @@ impl CropGridCell
 
     fn harvest(&mut self, score: &mut i32)
     {
+        if self.has_plant && self.plant.sprouted && self.plant.grown
+        {
+            self.plant.current_grow_time = self.plant.grow_time;
+            self.plant.grown = false;
+
+            *score += 10;
+        }
     }
 
     fn pull(&mut self, score: &mut i32)
@@ -80,7 +87,8 @@ impl CropGridCell
 
     fn render(&self)
     {
-        let offset = (32.0 * ((self.plant.plant_t.height() / TILEMAP_SPRITE_DIM) - 1.0)) + 10.0;
+        let offset = 10.0
+            + (32.0 * ((self.plant.plant_t.height() / TILEMAP_SPRITE_DIM) - 1.0));
         if self.has_plant && self.plant.grown
         {
             draw_texture(
@@ -200,6 +208,14 @@ impl CropGrid
 
     pub fn harvest_from_cell(&mut self, query: Rect, score: &mut i32)
     {
+        let mut crop_index: i32 = -1;
+        let intersect = self.check_for_intersect(&mut crop_index, query);
+
+        if crop_index > -1
+        {
+            let crop = &mut self.crops[crop_index as usize];
+            crop.harvest(score)
+        }
     }
 
     pub fn plant_to_cell(&mut self, plant: &Plant, query: Rect)
@@ -282,6 +298,7 @@ pub struct Plant
     name: String,
     sprout_time: f32,
     grow_time: f32,
+    current_grow_time: f32,
     water_usage: f32,
     sprout_t: Texture2D, // for plants which sprout, then produce (i.e. tomatoes)
     plant_t: Texture2D
@@ -305,6 +322,7 @@ impl Plant
             name,
             sprout_time,
             grow_time,
+            current_grow_time: grow_time,
             water_usage,
             sprout_t,
             plant_t
@@ -320,6 +338,7 @@ impl Plant
             name: "".to_string(),
             sprout_time: 0.0,
             grow_time: 0.0,
+            current_grow_time: 0.0,
             water_usage: 0.0,
             sprout_t: Texture2D::empty(),
             plant_t: Texture2D::empty()
@@ -331,13 +350,13 @@ impl Plant
         self.sprout_time -= dt;
         if self.sprout_time <= 0.0
         {
-            self.grow_time -= dt;
+            self.current_grow_time -= dt;
             self.sprouted = self.sprout_t.ne(&Texture2D::empty());
         }
 
-        if self.grow_time <= 0.0
+        if self.current_grow_time <= 0.0
         {
-            self.grow_time = 0.0;
+            self.current_grow_time = 0.0;
             self.grown = true;
         }
     }
@@ -349,6 +368,7 @@ impl Plant
         self.name = plant.name.clone();
         self.sprout_time = plant.sprout_time;
         self.grow_time = plant.grow_time;
+        self.current_grow_time = plant.current_grow_time;
         self.water_usage = plant.water_usage;
         self.sprout_t = plant.sprout_t;
         self.plant_t = plant.plant_t;

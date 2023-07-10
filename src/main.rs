@@ -102,6 +102,11 @@ async fn main()
             crop_grid.pull_from_cell(player.get_rect(), &mut score);
             println!("Score: {}", score);
         }
+        else if is_key_pressed(KeyCode::H)
+        {
+            crop_grid.harvest_from_cell(player.get_rect(), &mut score);
+            println!("Score: {}", score);
+        }
         // otherwise, check for water button
         else if is_key_pressed(KeyCode::L)
         {
