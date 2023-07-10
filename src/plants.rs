@@ -13,7 +13,6 @@ const CROPS_PER_ROW: usize = 5;
 /// structure which holds information about the space in the crop grid
 struct CropGridCell
 {
-    has_water: bool,
     has_plant: bool,
     pos: Vec2,
     rect: Rect,
@@ -29,7 +28,6 @@ impl CropGridCell
         let rect = Rect::new(pos.x, pos.y, TILEMAP_SPRITE_DIM, TILEMAP_SPRITE_DIM);
         Self
         {
-            has_water: true,
             has_plant: false,
             pos,
             rect,
@@ -45,12 +43,6 @@ impl CropGridCell
         {
             self.water_level -= self.plant.water_usage * dt;
             self.plant.update(dt);
-        }
-
-        if self.water_level <= 0.0
-        {
-            self.water_level = 0.0;
-            self.has_water = false;
         }
     }
 
@@ -120,12 +112,16 @@ impl CropGridCell
         }
     }
 
+    fn has_water(&self) -> bool
+    {
+        self.water_level > 0.0
+    }
+
     fn water(&mut self, portion: f32)
     {
-        if !self.has_water
+        if !self.has_water()
         {
             self.water_level = portion;
-            self.has_water = true;
         }
     }
 }
@@ -266,7 +262,7 @@ impl CropGrid
     {
         for crop in &self.crops
         {
-            if !crop.has_water
+            if !crop.has_water()
             {
                 draw_texture(
                     self.dry_t,
@@ -295,7 +291,7 @@ pub struct Plant
 {
     grown: bool,
     sprouted: bool,
-    name: String,
+    name: &'static str,
     sprout_time: f32,
     grow_time: f32,
     current_grow_time: f32,
@@ -304,10 +300,29 @@ pub struct Plant
     plant_t: Texture2D
 }
 
+impl Default for Plant {
+    fn default() -> Self
+    {
+        Self
+        {
+            grown: false,
+            sprouted: false,
+            name: "",
+            sprout_time: 0.0,
+            grow_time: 0.0,
+            current_grow_time: 0.0,
+            water_usage: 0.0,
+            sprout_t: Texture2D::empty(),
+            plant_t: Texture2D::empty()
+        }
+    }
+
+}
+
 impl Plant
 {
     pub fn new(
-        name: String,
+        name: &'static str,
         sprout_time: f32,
         grow_time: f32,
         water_usage: f32,
@@ -326,22 +341,6 @@ impl Plant
             water_usage,
             sprout_t,
             plant_t
-        }
-    }
-
-    pub fn default() -> Self
-    {
-        Self
-        {
-            grown: false,
-            sprouted: false,
-            name: "".to_string(),
-            sprout_time: 0.0,
-            grow_time: 0.0,
-            current_grow_time: 0.0,
-            water_usage: 0.0,
-            sprout_t: Texture2D::empty(),
-            plant_t: Texture2D::empty()
         }
     }
 
