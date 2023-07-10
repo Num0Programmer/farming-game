@@ -80,7 +80,7 @@ impl CropGridCell
 
     fn render(&self)
     {
-        let offset = 16.0 * (self.plant.plant_t.height() / TILEMAP_SPRITE_DIM);
+        let offset = 32.0 * ((self.plant.plant_t.height() / TILEMAP_SPRITE_DIM) - 1.0);
         if self.has_plant && self.plant.grown
         {
             draw_texture(
@@ -96,7 +96,7 @@ impl CropGridCell
             draw_texture(
                 self.seeded_t,
                 self.pos.x,
-                self.pos.y - offset,
+                self.pos.y,
                 WHITE
             );
         }
