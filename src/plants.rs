@@ -4,7 +4,8 @@ use macroquad::prelude::Vec2;
 use macroquad::texture::*;
 use macroquad::window::*;
 
-const SPRITE_DIM: f32 = 32.0;
+// expected size of sprite -- useful when crop grid becomes a tilemap
+const TILEMAP_SPRITE_DIM: f32 = 32.0;
 
 const CROP_ROWS: usize = 4;
 const CROPS_PER_ROW: usize = 5;
@@ -25,7 +26,7 @@ impl CropGridCell
 {
     fn new(pos: Vec2, seedling_t: Texture2D, plant: Plant) -> Self
     {
-        let rect = Rect::new(pos.x, pos.y, SPRITE_DIM, SPRITE_DIM);
+        let rect = Rect::new(pos.x, pos.y, TILEMAP_SPRITE_DIM, TILEMAP_SPRITE_DIM);
         Self
         {
             has_water: true,
@@ -141,9 +142,9 @@ impl CropGrid
         // initialize crops
         {
             let x_init = (pos.x / CROPS_PER_ROW as f32)
-                - (SPRITE_DIM / 2.0);
+                - (TILEMAP_SPRITE_DIM / 2.0);
             let mut y = (pos.y / CROP_ROWS as f32)
-                - (SPRITE_DIM / 2.0);
+                - (TILEMAP_SPRITE_DIM / 2.0);
 
             for _row in 0..CROP_ROWS
             {
