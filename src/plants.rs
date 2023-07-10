@@ -4,7 +4,8 @@ use macroquad::prelude::Vec2;
 use macroquad::texture::*;
 use macroquad::window::*;
 
-const SPRITE_DIM: f32 = 32.0;
+// expected size of sprite -- useful when crop grid becomes a tilemap
+const TILEMAP_SPRITE_DIM: f32 = 32.0;
 
 const CROP_ROWS: usize = 4;
 const CROPS_PER_ROW: usize = 5;
@@ -17,22 +18,32 @@ struct CropGridCell
     pos: Vec2,
     rect: Rect,
     water_level: f32,
+    seeded_t: Texture2D,
     plant: Plant
 }
 
 impl CropGridCell
 {
-    fn new(pos: Vec2, plant: Plant) -> Self
+    fn new(pos: Vec2, seedling_t: Texture2D, plant: Plant) -> Self
     {
-        let rect = Rect::new(pos.x, pos.y, SPRITE_DIM, SPRITE_DIM);
-        Self { has_water: true, has_plant: false, pos, rect, water_level: 10.0, plant }
+        let rect = Rect::new(pos.x, pos.y, TILEMAP_SPRITE_DIM, TILEMAP_SPRITE_DIM);
+        Self
+        {
+            has_water: true,
+            has_plant: false,
+            pos,
+            rect,
+            water_level: 0.0,
+            seeded_t: seedling_t,
+            plant
+        }
     }
 
     fn update(&mut self, dt: f32)
     {
-        if self.has_plant
+        if self.has_plant && !self.plant.grown && self.water_level > 0.0
         {
-            self.water_level -= self.plant.water_usage;
+            self.water_level -= self.plant.water_usage * dt;
             self.plant.update(dt);
         }
 
@@ -54,7 +65,18 @@ impl CropGridCell
 
     fn harvest(&mut self, score: &mut i32)
     {
-        if self.has_plant
+        if self.has_plant && self.plant.sprouted && self.plant.grown
+        {
+            self.plant.current_grow_time = self.plant.grow_time;
+            self.plant.grown = false;
+
+            *score += 10;
+        }
+    }
+
+    fn pull(&mut self, score: &mut i32)
+    {
+        if self.has_plant && self.plant.grown
         {
             self.plant.set_plant(&Plant::default());
             self.has_plant = false;
@@ -63,18 +85,36 @@ impl CropGridCell
         }
     }
 
-    pub fn pull(&mut self)
-    {
-    }
-
     fn render(&self)
     {
+        let offset = 10.0
+            + (32.0 * ((self.plant.plant_t.height() / TILEMAP_SPRITE_DIM) - 1.0));
         if self.has_plant && self.plant.grown
         {
             draw_texture(
                 self.plant.plant_t,
                 self.pos.x,
-                self.pos.y,
+                self.pos.y - offset,
+                WHITE
+            );
+        }
+        // otherwise, check plant has sprouted
+        else if self.has_plant && self.plant.sprouted
+        {
+            draw_texture(
+                self.plant.sprout_t,
+                self.pos.x,
+                self.pos.y - offset,
+                WHITE
+            );
+        }
+        // otherwise, assume communication there is something in the cell
+        else if self.has_plant
+        {
+            draw_texture(
+                self.seeded_t,
+                self.pos.x,
+                self.pos.y - 10.0,
                 WHITE
             );
         }
@@ -102,7 +142,12 @@ pub struct CropGrid
 
 impl CropGrid
 {
-    pub fn new(x: f32, y: f32, dry_t: Texture2D, watered_t: Texture2D) -> Self
+    pub fn new(
+        x: f32, y: f32,
+        dry_t: Texture2D,
+        watered_t: Texture2D,
+        seedling_t: Texture2D
+    ) -> Self
     {
         let area = CROP_ROWS * CROPS_PER_ROW;
         let pos = Vec2::new(x, y);
@@ -115,9 +160,9 @@ impl CropGrid
         // initialize crops
         {
             let x_init = (pos.x / CROPS_PER_ROW as f32)
-                - (SPRITE_DIM / 2.0);
+                - (TILEMAP_SPRITE_DIM / 2.0);
             let mut y = (pos.y / CROP_ROWS as f32)
-                - (SPRITE_DIM / 2.0);
+                - (TILEMAP_SPRITE_DIM / 2.0);
 
             for _row in 0..CROP_ROWS
             {
@@ -125,7 +170,9 @@ impl CropGrid
                 for _col in 0..CROPS_PER_ROW
                 {
                     let pos = Vec2::new(x, y);
-                    crops.push(CropGridCell::new(pos, Plant::default()));
+                    crops.push(CropGridCell::new(
+                        pos, seedling_t, Plant::default()
+                    ));
                     x += screen_partition.x;
                 }
                 y += screen_partition.y;
@@ -167,7 +214,7 @@ impl CropGrid
         if crop_index > -1
         {
             let crop = &mut self.crops[crop_index as usize];
-            crop.harvest(score);
+            crop.harvest(score)
         }
     }
 
@@ -180,6 +227,18 @@ impl CropGrid
         {
             let crop = &mut self.crops[crop_index as usize];
             crop.plant(plant)
+        }
+    }
+
+    pub fn pull_from_cell(&mut self, query: Rect, score: &mut i32)
+    {
+        let mut crop_index: i32 = -1;
+        let intersect = self.check_for_intersect(&mut crop_index, query);
+
+        if crop_index > -1
+        {
+            let crop = &mut self.crops[crop_index as usize];
+            crop.pull(score);
         }
     }
 
@@ -235,10 +294,13 @@ impl CropGrid
 pub struct Plant
 {
     grown: bool,
+    sprouted: bool,
     name: String,
+    sprout_time: f32,
     grow_time: f32,
+    current_grow_time: f32,
     water_usage: f32,
-    seed_t: Texture2D,
+    sprout_t: Texture2D, // for plants which sprout, then produce (i.e. tomatoes)
     plant_t: Texture2D
 }
 
@@ -246,13 +308,25 @@ impl Plant
 {
     pub fn new(
         name: String,
+        sprout_time: f32,
         grow_time: f32,
         water_usage: f32,
-        seed_t: Texture2D,
+        sprout_t: Texture2D,
         plant_t: Texture2D
     ) -> Self
     {
-        Self { grown: false, name, grow_time, water_usage, seed_t, plant_t }
+        Self
+        {
+            grown: false,
+            sprouted: false,
+            name,
+            sprout_time,
+            grow_time,
+            current_grow_time: grow_time,
+            water_usage,
+            sprout_t,
+            plant_t
+        }
     }
 
     pub fn default() -> Self
@@ -260,31 +334,43 @@ impl Plant
         Self
         {
             grown: false,
+            sprouted: false,
             name: "".to_string(),
+            sprout_time: 0.0,
             grow_time: 0.0,
+            current_grow_time: 0.0,
             water_usage: 0.0,
-            seed_t: Texture2D::empty(),
+            sprout_t: Texture2D::empty(),
             plant_t: Texture2D::empty()
         }
     }
 
     fn update(&mut self, dt: f32)
     {
-        self.grow_time -= dt;
-        if self.grow_time <= 0.0
+        self.sprout_time -= dt;
+        if self.sprout_time <= 0.0
         {
-            self.grow_time = 0.0;
+            self.current_grow_time -= dt;
+            self.sprouted = self.sprout_t.ne(&Texture2D::empty());
+        }
+
+        if self.current_grow_time <= 0.0
+        {
+            self.current_grow_time = 0.0;
             self.grown = true;
         }
     }
 
     fn set_plant(&mut self, plant: &Plant)
     {
+        self.sprouted = plant.sprouted;
         self.grown = plant.grown;
         self.name = plant.name.clone();
+        self.sprout_time = plant.sprout_time;
         self.grow_time = plant.grow_time;
+        self.current_grow_time = plant.current_grow_time;
         self.water_usage = plant.water_usage;
-        self.seed_t = plant.seed_t;
+        self.sprout_t = plant.sprout_t;
         self.plant_t = plant.plant_t;
     }
 }
