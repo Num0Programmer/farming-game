@@ -295,7 +295,7 @@ pub struct Plant
 {
     grown: bool,
     sprouted: bool,
-    name: String,
+    name: &'static str,
     sprout_time: f32,
     grow_time: f32,
     current_grow_time: f32,
@@ -307,7 +307,7 @@ pub struct Plant
 impl Plant
 {
     pub fn new(
-        name: String,
+        name: &'static str,
         sprout_time: f32,
         grow_time: f32,
         water_usage: f32,
@@ -335,7 +335,7 @@ impl Plant
         {
             grown: false,
             sprouted: false,
-            name: "".to_string(),
+            name: "",
             sprout_time: 0.0,
             grow_time: 0.0,
             current_grow_time: 0.0,
