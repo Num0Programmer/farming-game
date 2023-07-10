@@ -9,6 +9,9 @@ use plants::*;
 pub mod tools;
 use tools::*;
 
+const PLANT_PATH: &str = "assets/plants/";
+const TILEMAP_PATH: &str = "assets/tilemap/";
+
 #[macroquad::main("Farming Game")]
 async fn main()
 {
@@ -16,9 +19,15 @@ async fn main()
     let mut score = 0;
     let mut crop_grid = CropGrid::new(
         screen_width() / 2.0, screen_height() / 2.0,
-        load_texture("assets/dirt.png").await.unwrap(),
-        load_texture("assets/watered_dirt.png").await.unwrap(),
-        load_texture("assets/seedling.png").await.unwrap()
+        load_texture(
+            &(TILEMAP_PATH.to_owned() + "dirt.png")
+        ).await.unwrap(),
+        load_texture(
+            &(TILEMAP_PATH.to_owned() + "watered_dirt.png")
+        ).await.unwrap(),
+        load_texture(
+            &(PLANT_PATH.to_owned() + "seedling.png")
+        ).await.unwrap()
     );
 
     // init player and tools
@@ -31,17 +40,24 @@ async fn main()
     let potato = Plant::new(
         "Potato".to_string(), 12.0, 4.0,
         Texture2D::empty(),
-        load_texture("assets/potato.png").await.unwrap()
+        load_texture(&(PLANT_PATH.to_owned() + "potato.png")).await.unwrap()
     );
     let carrot = Plant::new(
-        "Carrot".to_string(), 10.0, 7.0,
+        "Carrot".to_string(), 5.0, 4.0,
         Texture2D::empty(),
-        load_texture("assets/carrot.png").await.unwrap()
+        load_texture(
+            &(PLANT_PATH.to_owned() + "carrot.png")
+        ).await.unwrap()
     );
     let beet = Plant::new(
         "Beet".to_string(), 12.0, 2.0,
         Texture2D::empty(),
-        load_texture("assets/beet.png").await.unwrap()
+        load_texture(&(PLANT_PATH.to_owned() + "beet.png")).await.unwrap()
+    );
+    let tomato = Plant::new(
+        "Tomato".to_string(), 20.0, 10.0,
+        load_texture(&(PLANT_PATH.to_owned() + "tomato_sprout.png")).await.unwrap(),
+        load_texture(&(PLANT_PATH.to_owned() + "tomato.png")).await.unwrap()
     );
 
     let mut selected_plant = &potato;
@@ -68,6 +84,11 @@ async fn main()
         else if is_key_pressed(KeyCode::Key3)
         {
             selected_plant = &beet;
+        }
+        // otherwise, check for tomato select
+        else if is_key_pressed(KeyCode::Key4)
+        {
+            selected_plant = &tomato;
         }
 
         // check for plant button
