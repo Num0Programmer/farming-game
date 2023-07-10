@@ -20,10 +20,10 @@ async fn main()
     let mut crop_grid = CropGrid::new(
         screen_width() / 2.0, screen_height() / 2.0,
         load_texture(
-            &(TILEMAP_PATH.to_owned() + "dirt.png")
+            &(TILEMAP_PATH.to_owned() + "dry_soil.png")
         ).await.unwrap(),
         load_texture(
-            &(TILEMAP_PATH.to_owned() + "watered_dirt.png")
+            &(TILEMAP_PATH.to_owned() + "wet_soil.png")
         ).await.unwrap(),
         load_texture(
             &(PLANT_PATH.to_owned() + "seedling.png")
