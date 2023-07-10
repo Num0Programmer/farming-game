@@ -304,6 +304,25 @@ pub struct Plant
     plant_t: Texture2D
 }
 
+impl Default for Plant {
+    fn default() -> Self
+    {
+        Self
+        {
+            grown: false,
+            sprouted: false,
+            name: "",
+            sprout_time: 0.0,
+            grow_time: 0.0,
+            current_grow_time: 0.0,
+            water_usage: 0.0,
+            sprout_t: Texture2D::empty(),
+            plant_t: Texture2D::empty()
+        }
+    }
+
+}
+
 impl Plant
 {
     pub fn new(
@@ -326,22 +345,6 @@ impl Plant
             water_usage,
             sprout_t,
             plant_t
-        }
-    }
-
-    pub fn default() -> Self
-    {
-        Self
-        {
-            grown: false,
-            sprouted: false,
-            name: "",
-            sprout_time: 0.0,
-            grow_time: 0.0,
-            current_grow_time: 0.0,
-            water_usage: 0.0,
-            sprout_t: Texture2D::empty(),
-            plant_t: Texture2D::empty()
         }
     }
 
