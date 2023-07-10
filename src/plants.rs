@@ -90,13 +90,23 @@ impl CropGridCell
                 WHITE
             );
         }
+        // otherwise, check plant has sprouted
+        else if self.has_plant && self.plant.sprouted
+        {
+            draw_texture(
+                self.plant.sprout_t,
+                self.pos.x,
+                self.pos.y - offset,
+                WHITE
+            );
+        }
         // otherwise, assume communication there is something in the cell
         else if self.has_plant
         {
             draw_texture(
                 self.seeded_t,
                 self.pos.x,
-                self.pos.y - offset,
+                self.pos.y - 10.0,
                 WHITE
             );
         }
@@ -152,7 +162,9 @@ impl CropGrid
                 for _col in 0..CROPS_PER_ROW
                 {
                     let pos = Vec2::new(x, y);
-                    crops.push(CropGridCell::new(pos, seedling_t, Plant::default()));
+                    crops.push(CropGridCell::new(
+                        pos, seedling_t, Plant::default()
+                    ));
                     x += screen_partition.x;
                 }
                 y += screen_partition.y;
@@ -266,7 +278,9 @@ impl CropGrid
 pub struct Plant
 {
     grown: bool,
+    sprouted: bool,
     name: String,
+    sprout_time: f32,
     grow_time: f32,
     water_usage: f32,
     sprout_t: Texture2D, // for plants which sprout, then produce (i.e. tomatoes)
@@ -277,13 +291,24 @@ impl Plant
 {
     pub fn new(
         name: String,
+        sprout_time: f32,
         grow_time: f32,
         water_usage: f32,
         sprout_t: Texture2D,
         plant_t: Texture2D
     ) -> Self
     {
-        Self { grown: false, name, grow_time, water_usage, sprout_t, plant_t }
+        Self
+        {
+            grown: false,
+            sprouted: false,
+            name,
+            sprout_time,
+            grow_time,
+            water_usage,
+            sprout_t,
+            plant_t
+        }
     }
 
     pub fn default() -> Self
@@ -291,7 +316,9 @@ impl Plant
         Self
         {
             grown: false,
+            sprouted: false,
             name: "".to_string(),
+            sprout_time: 0.0,
             grow_time: 0.0,
             water_usage: 0.0,
             sprout_t: Texture2D::empty(),
@@ -301,7 +328,13 @@ impl Plant
 
     fn update(&mut self, dt: f32)
     {
-        self.grow_time -= dt;
+        self.sprout_time -= dt;
+        if self.sprout_time <= 0.0
+        {
+            self.grow_time -= dt;
+            self.sprouted = self.sprout_t.ne(&Texture2D::empty());
+        }
+
         if self.grow_time <= 0.0
         {
             self.grow_time = 0.0;
@@ -311,8 +344,10 @@ impl Plant
 
     fn set_plant(&mut self, plant: &Plant)
     {
+        self.sprouted = plant.sprouted;
         self.grown = plant.grown;
         self.name = plant.name.clone();
+        self.sprout_time = plant.sprout_time;
         self.grow_time = plant.grow_time;
         self.water_usage = plant.water_usage;
         self.sprout_t = plant.sprout_t;

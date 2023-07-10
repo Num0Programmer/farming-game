@@ -38,24 +38,24 @@ async fn main()
 
     // init plants
     let potato = Plant::new(
-        "Potato".to_string(), 0.0, 0.0,
+        "Potato".to_string(), 0.0, 10.0, 6.0,
         Texture2D::empty(),
         load_texture(&(PLANT_PATH.to_owned() + "potato.png")).await.unwrap()
     );
     let carrot = Plant::new(
-        "Carrot".to_string(), 0.0, 0.0,
+        "Carrot".to_string(), 0.0, 10.0, 2.0,
         Texture2D::empty(),
         load_texture(
             &(PLANT_PATH.to_owned() + "carrot.png")
         ).await.unwrap()
     );
     let beet = Plant::new(
-        "Beet".to_string(), 0.0, 0.0,
+        "Beet".to_string(), 0.0, 15.0, 6.0,
         Texture2D::empty(),
         load_texture(&(PLANT_PATH.to_owned() + "beet.png")).await.unwrap()
     );
     let tomato = Plant::new(
-        "Tomato".to_string(), 0.0, 0.0,
+        "Tomato".to_string(), 6.0, 10.0, 10.0,
         load_texture(&(PLANT_PATH.to_owned() + "tomato_sprout.png")).await.unwrap(),
         load_texture(&(PLANT_PATH.to_owned() + "tomato.png")).await.unwrap()
     );
