@@ -13,7 +13,6 @@ const CROPS_PER_ROW: usize = 5;
 /// structure which holds information about the space in the crop grid
 struct CropGridCell
 {
-    has_water: bool,
     has_plant: bool,
     pos: Vec2,
     rect: Rect,
@@ -29,7 +28,6 @@ impl CropGridCell
         let rect = Rect::new(pos.x, pos.y, TILEMAP_SPRITE_DIM, TILEMAP_SPRITE_DIM);
         Self
         {
-            has_water: true,
             has_plant: false,
             pos,
             rect,
@@ -45,12 +43,6 @@ impl CropGridCell
         {
             self.water_level -= self.plant.water_usage * dt;
             self.plant.update(dt);
-        }
-
-        if self.water_level <= 0.0
-        {
-            self.water_level = 0.0;
-            self.has_water = false;
         }
     }
 
@@ -120,12 +112,16 @@ impl CropGridCell
         }
     }
 
+    fn has_water(&self) -> bool
+    {
+        self.water_level > 0.0
+    }
+
     fn water(&mut self, portion: f32)
     {
-        if !self.has_water
+        if !self.has_water()
         {
             self.water_level = portion;
-            self.has_water = true;
         }
     }
 }
@@ -266,7 +262,7 @@ impl CropGrid
     {
         for crop in &self.crops
         {
-            if !crop.has_water
+            if !crop.has_water()
             {
                 draw_texture(
                     self.dry_t,
