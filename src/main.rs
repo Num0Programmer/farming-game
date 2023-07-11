@@ -17,17 +17,17 @@ async fn main()
 {
     // init game management
     let mut score = 0;
+    let dry_t = load_texture(
+        &(TILEMAP_PATH.to_owned() + "dry_soil.png")
+    ).await.unwrap();
+    let wet_t = load_texture(
+        &(TILEMAP_PATH.to_owned() + "wet_soil.png")
+    ).await.unwrap();
+    let seedling_t = load_texture(
+        &(PLANT_PATH.to_owned() + "seedling.png")
+    ).await.unwrap();
     let mut crop_grid = CropGrid::new(
         screen_width() / 2.0, screen_height() / 2.0,
-        load_texture(
-            &(TILEMAP_PATH.to_owned() + "dry_soil.png")
-        ).await.unwrap(),
-        load_texture(
-            &(TILEMAP_PATH.to_owned() + "wet_soil.png")
-        ).await.unwrap(),
-        load_texture(
-            &(PLANT_PATH.to_owned() + "seedling.png")
-        ).await.unwrap()
     );
 
     // init player and tools
@@ -37,24 +37,24 @@ async fn main()
     let water_can = WaterCan::new();
 
     // init plants
-    let potato = Plant::new(
+    let potato = PlantType::new(
         "Potato", 0.0, 10.0, 6.0,
         Texture2D::empty(),
         load_texture(&(PLANT_PATH.to_owned() + "potato.png")).await.unwrap()
     );
-    let carrot = Plant::new(
+    let carrot = PlantType::new(
         "Carrot", 0.0, 10.0, 2.0,
         Texture2D::empty(),
         load_texture(
             &(PLANT_PATH.to_owned() + "carrot.png")
         ).await.unwrap()
     );
-    let beet = Plant::new(
+    let beet = PlantType::new(
         "Beet", 0.0, 15.0, 6.0,
         Texture2D::empty(),
         load_texture(&(PLANT_PATH.to_owned() + "beet.png")).await.unwrap()
     );
-    let tomato = Plant::new(
+    let tomato = PlantType::new(
         "Tomato", 6.0, 10.0, 10.0,
         load_texture(&(PLANT_PATH.to_owned() + "tomato_sprout.png")).await.unwrap(),
         load_texture(&(PLANT_PATH.to_owned() + "tomato.png")).await.unwrap()
@@ -118,7 +118,7 @@ async fn main()
         player.update(get_frame_time());
 
         // draw entities to screen
-        crop_grid.render();
+        crop_grid.render(&seedling_t, &dry_t, &wet_t);
         player.render();
 
         next_frame().await
