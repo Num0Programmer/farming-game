@@ -40,7 +40,6 @@ impl<'a> CropGridCell<'a>
         {
             plant.update(dt, &mut self.water_level)
         }
-
     }
 
     fn plant(&mut self, plant: &'a PlantType)
@@ -56,6 +55,11 @@ impl<'a> CropGridCell<'a>
         if let Some(plant) = &mut self.plant
         {
             plant.harvest(score);
+
+            if plant.plant_type.sprout_time == 0.
+            {
+                self.plant = None;
+            }
         }
     }
 
@@ -65,8 +69,9 @@ impl<'a> CropGridCell<'a>
         if matches!(&self.plant, Some(plant) if plant.grow_counter <= 0.)
         {
             *score += 10;
-            self.plant = None;
         }
+
+        self.plant = None;
     }
 
     fn render(
@@ -145,7 +150,7 @@ impl<'a> CropGrid<'a>
     {
         if let Some(crop) = self.check_for_intersect(query)
         {
-            crop.harvest(score)
+            crop.harvest(score);
         }
     }
 
@@ -153,7 +158,7 @@ impl<'a> CropGrid<'a>
     {
         if let Some(crop) = self.check_for_intersect(query)
         {
-            crop.plant(plant)
+            crop.plant(plant);
         }
     }
 
@@ -232,7 +237,7 @@ impl PlantType
 pub struct Plant<'a>
 {
     plant_type: &'a PlantType,
-    grow_counter: f32,
+    grow_counter: f32
 }
 
 impl<'a> Plant<'a>
@@ -242,7 +247,7 @@ impl<'a> Plant<'a>
         Self
         {
             plant_type,
-            grow_counter: plant_type.grow_time,
+            grow_counter: plant_type.grow_time + plant_type.sprout_time
         }
     }
 
@@ -260,7 +265,7 @@ impl<'a> Plant<'a>
         if self.grow_counter <= 0.
         {
             *score += 10;
-            self.grow_counter = self.plant_type.grow_time;
+            self.grow_counter = self.plant_type.sprout_time;
         }
     }
 
