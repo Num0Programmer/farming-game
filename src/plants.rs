@@ -102,19 +102,19 @@ impl<'a> CropGridCell<'a>
 pub struct CropGrid<'a>
 {
     pos: Vec2,
-    screen_partition: Vec2,
+    area_partition: Vec2,
     crops: Vec<CropGridCell<'a>>
 }
 
 impl<'a> CropGrid<'a>
 {
-    pub fn new(x: f32, y: f32) -> Self
+    pub fn new(x: f32, y: f32, w: f32, h: f32) -> Self
     {
         let area = CROP_ROWS * CROPS_PER_ROW;
         let pos = Vec2::new(x, y);
-        let screen_partition = Vec2::new(
-            screen_width() / CROPS_PER_ROW as f32,
-            screen_height() / CROP_ROWS as f32
+        let area_partition = Vec2::new(
+            w / CROPS_PER_ROW as f32,
+            h / CROP_ROWS as f32
         );
 
         let x_init = (pos.x / CROPS_PER_ROW as f32)
@@ -125,17 +125,17 @@ impl<'a> CropGrid<'a>
         // initialize crops
         for row in 0..CROP_ROWS
         {
-            let y = y_init + (row as f32 * screen_partition.y);
+            let y = y_init + (row as f32 * area_partition.y);
 
             for col in 0..CROPS_PER_ROW
             {
-                let x = x_init + (col as f32 * screen_partition.x);
+                let x = x_init + (col as f32 * area_partition.x);
                 let pos = Vec2::new(x, y);
                 crops.push(CropGridCell::new(pos));
             }
         }
 
-        Self { pos, screen_partition, crops }
+        Self { pos, area_partition, crops }
     }
 
     fn check_for_intersect<'b>(
@@ -290,3 +290,4 @@ impl<'a> Plant<'a>
         }
     }
 }
+
