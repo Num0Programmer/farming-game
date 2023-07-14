@@ -1,6 +1,7 @@
 use macroquad::color::WHITE;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
+use macroquad::shapes::draw_rectangle_lines;
 use macroquad::texture::*;
 use macroquad::window::*;
 
@@ -9,6 +10,7 @@ const TILEMAP_SPRITE_DIM: f32 = 32.0;
 
 const CROP_ROWS: usize = 4;
 const CROPS_PER_ROW: usize = 5;
+const GRID_PADDING: f32 = 22.0;
 
 /// structure which holds information about the space in the crop grid
 struct CropGridCell<'a>
@@ -102,7 +104,8 @@ impl<'a> CropGridCell<'a>
 pub struct CropGrid<'a>
 {
     pos: Vec2,
-    area_partition: Vec2,
+    w: f32,
+    h: f32,
     crops: Vec<CropGridCell<'a>>
 }
 
@@ -110,32 +113,29 @@ impl<'a> CropGrid<'a>
 {
     pub fn new(x: f32, y: f32, w: f32, h: f32) -> Self
     {
-        let area = CROP_ROWS * CROPS_PER_ROW;
         let pos = Vec2::new(x, y);
         let area_partition = Vec2::new(
             w / CROPS_PER_ROW as f32,
             h / CROP_ROWS as f32
         );
 
-        let x_init = (pos.x / CROPS_PER_ROW as f32)
-            - (TILEMAP_SPRITE_DIM / 2.0);
-        let y_init = (pos.y / CROP_ROWS as f32)
-            - (TILEMAP_SPRITE_DIM / 2.0);
-        let mut crops = Vec::with_capacity(area);
+        let x_init = pos.x - (w / 2.);
+        let y_init = pos.y - (h / 2.);
+        let mut crops = Vec::with_capacity(CROP_ROWS * CROPS_PER_ROW);
         // initialize crops
         for row in 0..CROP_ROWS
         {
-            let y = y_init + (row as f32 * area_partition.y);
+            let y = y_init + (area_partition.y * row as f32) + GRID_PADDING;
 
             for col in 0..CROPS_PER_ROW
             {
-                let x = x_init + (col as f32 * area_partition.x);
+                let x = x_init + (area_partition.x * col as f32) + GRID_PADDING;
                 let pos = Vec2::new(x, y);
                 crops.push(CropGridCell::new(pos));
             }
         }
 
-        Self { pos, area_partition, crops }
+        Self { pos, w, h, crops }
     }
 
     fn check_for_intersect<'b>(
