@@ -1,14 +1,16 @@
 use macroquad::color::WHITE;
+use macroquad::color::RED;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
+use macroquad::shapes::draw_rectangle;
 use macroquad::shapes::draw_rectangle_lines;
 use macroquad::texture::*;
 use macroquad::window::*;
 
 // expected size of sprite -- useful when crop grid becomes a tilemap
-const TILEMAP_SPRITE_DIM: f32 = 32.0;
+const SPRITE_DIM: f32 = 32.0;
 
-const CROP_ROWS: usize = 4;
+const CROP_ROWS: usize = 5;
 const CROPS_PER_ROW: usize = 5;
 const GRID_PADDING: f32 = 22.0;
 
@@ -25,7 +27,7 @@ impl<'a> CropGridCell<'a>
 {
     fn new(pos: Vec2) -> Self
     {
-        let rect = Rect::new(pos.x, pos.y, TILEMAP_SPRITE_DIM, TILEMAP_SPRITE_DIM);
+        let rect = Rect::new(pos.x, pos.y, SPRITE_DIM, SPRITE_DIM);
         Self
         {
             pos,
@@ -84,10 +86,19 @@ impl<'a> CropGridCell<'a>
     ) {
         // render the ground, wet or dry
         let ground = if self.water_level > 0. { *wet_t } else { *dry_t };
-        draw_texture(ground, self.pos.x, self.pos.y, WHITE);
+        draw_texture(
+            ground,
+            self.pos.x - (self.rect.w / 2.),
+            self.pos.y - (self.rect.h / 2.),
+            WHITE
+        );
         // only render the plant, if there is one
         if let Some(plant) = &self.plant {
-            plant.render(seeded_t, self.pos.x, self.pos.y);
+            plant.render(
+                seeded_t,
+                self.pos.x - (self.rect.w / 2.),
+                self.pos.y - (self.rect.h / 2.)
+            );
         }
     }
 
@@ -121,15 +132,18 @@ impl<'a> CropGrid<'a>
 
         let x_init = pos.x - (w / 2.);
         let y_init = pos.y - (h / 2.);
+        let x_padding = area_partition.x / 2.;
+        let y_padding = area_partition.y / 2.;
+
         let mut crops = Vec::with_capacity(CROP_ROWS * CROPS_PER_ROW);
         // initialize crops
         for row in 0..CROP_ROWS
         {
-            let y = y_init + (area_partition.y * row as f32) + GRID_PADDING;
+            let y = y_init + (area_partition.y * row as f32) + y_padding;
 
             for col in 0..CROPS_PER_ROW
             {
-                let x = x_init + (area_partition.x * col as f32) + GRID_PADDING;
+                let x = x_init + (area_partition.x * col as f32) + x_padding;
                 let pos = Vec2::new(x, y);
                 crops.push(CropGridCell::new(pos));
             }
@@ -271,8 +285,8 @@ impl<'a> Plant<'a>
 
     fn render(&self, seeded_t: &Texture2D, x: f32, y: f32)
     {
-        let offset = 10.0
-            + (32.0 * ((self.plant_type.plant_t.height() / TILEMAP_SPRITE_DIM) - 1.0));
+        let offset = 14.0
+            + (32.0 * ((self.plant_type.plant_t.height() / SPRITE_DIM) - 1.0));
         if self.grow_counter <= 0.
         {
             // plant is fully grown
@@ -286,7 +300,7 @@ impl<'a> Plant<'a>
         else
         {
             // plant is on it's initial stage
-            draw_texture(*seeded_t, x, y - 10.0, WHITE);
+            draw_texture(*seeded_t, x, y - 14., WHITE);
         }
     }
 }

@@ -28,8 +28,8 @@ async fn main()
     ).await.unwrap();
     // init crop grid
     let mut crop_grid = CropGrid::new(
-        screen_width() / 2., screen_height() / 2.,
-        400., 300.
+        screen_width() / 4., screen_height() / 2.,
+        400., 500.
     );
 
     // init player and tools
