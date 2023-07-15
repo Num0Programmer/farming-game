@@ -26,8 +26,10 @@ async fn main()
     let seedling_t = load_texture(
         &(PLANT_PATH.to_owned() + "seedling.png")
     ).await.unwrap();
+    // init crop grid
     let mut crop_grid = CropGrid::new(
-        screen_width() / 2.0, screen_height() / 2.0,
+        screen_width() / 4., screen_height() / 2.,
+        400., 500.
     );
 
     // init player and tools
@@ -56,7 +58,9 @@ async fn main()
     );
     let tomato = PlantType::new(
         "Tomato", 6.0, 10.0, 10.0,
-        load_texture(&(PLANT_PATH.to_owned() + "tomato_sprout.png")).await.unwrap(),
+        load_texture(
+            &(PLANT_PATH.to_owned() + "tomato_sprout.png")
+        ).await.unwrap(),
         load_texture(&(PLANT_PATH.to_owned() + "tomato.png")).await.unwrap()
     );
 
