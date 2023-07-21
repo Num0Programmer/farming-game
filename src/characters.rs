@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use macroquad::color::WHITE;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
@@ -7,22 +9,28 @@ use macroquad::texture::*;
 
 const REACH: f32 = 50.0;
 
-pub struct Player
+// character classification
+pub struct Player;
+pub struct Crow;
+
+pub struct Character<Class>
 {
     pos: Vec2,
     rect: Rect,
     speed: f32,
-    texture: Texture2D
+    texture: Texture2D,
+    class: PhantomData<Class>
 }
 
-impl Player 
+impl Character<Player>
 {
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
         let pos = Vec2::new(150.0, 150.0);
         let rect = Rect::new(pos.x, pos.y, REACH, REACH);
+        let class = PhantomData::<Player>;
 
-        Self { pos, rect, speed, texture }
+        Self { pos, rect, speed, texture, class }
     }
 
     pub fn update(&mut self, dt: f32)
@@ -47,7 +55,10 @@ impl Player
         self.rect.x = self.pos.x - (REACH / 2.0);
         self.rect.y = self.pos.y - (REACH / 2.0);
     }
+}
 
+impl<Class> Character<Class>
+{
     pub fn render(&self)
     {
         let x = self.pos.x - (self.texture.width() / 2.0);

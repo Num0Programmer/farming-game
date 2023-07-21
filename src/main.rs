@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 pub mod characters;
-use characters::Player;
+use characters::*;
 
 pub mod plants;
 use plants::*;
@@ -34,7 +34,7 @@ async fn main()
     );
 
     // init player and tools
-    let mut player = Player::new(
+    let mut player = Character::new(
         120.0, load_texture("assets/place_holder.png").await.unwrap()
     );
     let water_can = WaterCan::new();

@@ -1,5 +1,4 @@
 use macroquad::color::WHITE;
-use macroquad::color::RED;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
 use macroquad::shapes::draw_rectangle;
