@@ -11,6 +11,7 @@ use tools::*;
 
 const PLANT_PATH: &str = "assets/plants/";
 const TILEMAP_PATH: &str = "assets/tilemap/";
+const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
 
 #[macroquad::main("Farming Game")]
 async fn main()
@@ -72,7 +73,7 @@ async fn main()
             break;
         }
 
-        clear_background(BLUE);
+        clear_background(GROUND);
 
         // check for potato select
         if is_key_pressed(KeyCode::Key1)
