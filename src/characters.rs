@@ -57,6 +57,21 @@ impl Character<Player>
     }
 }
 
+impl Character<Crow>
+{
+    pub fn new(speed: f32, texture: Texture2D) -> Self
+    {
+        let pos = Vec2::new(
+            macroquad::window::screen_width() / 2.0,
+            macroquad::window::screen_height() / 2.0
+        );
+        let rect = Rect::default();
+        let class = PhantomData::<Crow>;
+
+        Self { pos, rect, speed, texture, class }
+    }
+}
+
 impl<Class> Character<Class>
 {
     pub fn render(&self)

@@ -35,13 +35,19 @@ async fn main()
     );
 
     // init player and tools
-    let mut player = Character::new(
+    let mut player = Character::<Player>::new(
         120.0,
         load_texture(
             &(CHARACTER_PATH.to_owned() + "place_holder.png")
         ).await.unwrap()
     );
     let water_can = WaterCan::new();
+
+    // init crows
+    let crow = Character::<Crow>::new(
+        0.0,
+        load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
+    );
 
     // init plants
     let potato = PlantType::new(
@@ -129,6 +135,7 @@ async fn main()
         // draw entities to screen
         crop_grid.render(&seedling_t, &dry_t, &wet_t);
         player.render();
+        crow.render();
 
         next_frame().await
     }
