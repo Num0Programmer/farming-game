@@ -9,6 +9,7 @@ use plants::*;
 pub mod tools;
 use tools::*;
 
+const CHARACTER_PATH: &str = "assets/characters/";
 const PLANT_PATH: &str = "assets/plants/";
 const TILEMAP_PATH: &str = "assets/tilemap/";
 const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
@@ -35,7 +36,10 @@ async fn main()
 
     // init player and tools
     let mut player = Character::new(
-        120.0, load_texture("assets/place_holder.png").await.unwrap()
+        120.0,
+        load_texture(
+            &(CHARACTER_PATH.to_owned() + "place_holder.png")
+        ).await.unwrap()
     );
     let water_can = WaterCan::new();
 
