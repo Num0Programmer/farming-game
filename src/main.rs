@@ -35,7 +35,7 @@ async fn main()
     );
 
     // init player and tools
-    let mut player = Character::<Player>::new(
+    let mut player = Player::new(
         120.0,
         load_texture(
             &(CHARACTER_PATH.to_owned() + "place_holder.png")
@@ -44,7 +44,7 @@ async fn main()
     let water_can = WaterCan::new();
 
     // init crows
-    let crow = Character::<Crow>::new(
+    let crow = Crow::new(
         0.0,
         load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
     );

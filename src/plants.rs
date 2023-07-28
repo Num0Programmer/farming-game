@@ -1,10 +1,7 @@
 use macroquad::color::WHITE;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
-use macroquad::shapes::draw_rectangle;
-use macroquad::shapes::draw_rectangle_lines;
 use macroquad::texture::*;
-use macroquad::window::*;
 
 // expected size of sprite -- useful when crop grid becomes a tilemap
 const SPRITE_DIM: f32 = 32.0;
@@ -14,12 +11,12 @@ const CROPS_PER_ROW: usize = 5;
 const GRID_PADDING: f32 = 22.0;
 
 /// structure which holds information about the space in the crop grid
-struct CropGridCell<'a>
+pub struct CropGridCell<'a>
 {
-    pos: Vec2,
+    pub pos: Vec2,
     rect: Rect,
     water_level: f32,
-    plant: Option<Plant<'a>>,
+    pub plant: Option<Plant<'a>>,
 }
 
 impl<'a> CropGridCell<'a>
