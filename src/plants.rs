@@ -113,7 +113,7 @@ pub struct CropGrid<'a>
     pos: Vec2,
     w: f32,
     h: f32,
-    crops: Vec<CropGridCell<'a>>
+    pub crops: Vec<CropGridCell<'a>>
 }
 
 impl<'a> CropGrid<'a>

@@ -71,39 +71,33 @@ pub struct Crow
 {
     speed: f32,
     pos: Vec2,
-    target: Vec2,
+    target: Option<Vec2>,
     rect: Rect,
     texture: Texture2D
 }
 
 /// functions specific to crow character
-impl<'a> Crow
+impl Crow
 {
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
-        let target = Vec2::default();
         let pos = Vec2::new(
             macroquad::window::screen_width() / 2.0,
             macroquad::window::screen_height() / 2.0
         );
         let rect = Rect::default();
 
-        Self { speed, pos, target, rect, texture }
-    }
-
-    pub fn render(&self)
-    {
-        let x = self.pos.x - (self.texture.width() / 2.0);
-        let y = self.pos.y - (self.texture.height() / 2.0);
-        draw_texture(self.texture, x, y, WHITE);
+        Self
+        {
+            speed,
+            pos,
+            target: None,
+            rect,
+            texture
+        }
     }
     
-    pub fn get_rect(&self) -> Rect
-    {
-        Rect::new(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
-    }
-
-    pub fn target(crops: Vec<CropGridCell<'a>>) -> Option<Vec2>
+    fn find_target(&self, crops: &Vec<CropGridCell>) -> Option<Vec2>
     {
         let mut save = 0;
         let mut count = 0;
@@ -121,11 +115,56 @@ impl<'a> Crow
             count += 1;
         }
 
-        Some(crops[index as usize].pos)
+        if index < 0
+        {
+            None
+        }
+        else
+        {
+            Some(crops[index as usize].pos)
+        }
     }
 
-    pub fn update(dt: f32)
+    fn fly(&mut self, dt: f32)
     {
+        if let Some(t) = self.target
+        {
+            let heading = -(self.pos - t).normalize();
+            self.pos += heading * self.speed * dt;
+        };
+    }
+
+    pub fn get_rect(&self) -> Rect
+    {
+        Rect::new(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
+    }
+
+    pub fn update(&mut self, dt: f32, crops: &Vec<CropGridCell>)
+    {
+        // check already targeted a plant
+        // TODO: implement way for crow to be scared away and interest timer
+        if matches!(
+            &self.target,
+            Some(target)
+            if (self.pos.x - target.x).abs() > 2.0 && (self.pos.y - target.y).abs() > 2.0
+        )
+        {
+            println!("Flying to {:?}", self.target);
+            self.fly(dt);
+        }
+        // otherwise, assume need to find a new plant
+        else
+        {
+            self.target = self.find_target(crops);
+            println!("Chose plant at {:?}", self.target);
+        }
+    }
+
+    pub fn render(&self)
+    {
+        let x = self.pos.x - (self.texture.width() / 2.0);
+        let y = self.pos.y - (self.texture.height() / 2.0);
+        draw_texture(self.texture, x, y, WHITE);
     }
 }
 

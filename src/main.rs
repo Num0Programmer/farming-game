@@ -44,8 +44,8 @@ async fn main()
     let water_can = WaterCan::new();
 
     // init crows
-    let crow = Crow::new(
-        0.0,
+    let mut crow = Crow::new(
+        120.0,
         load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
     );
 
@@ -131,6 +131,7 @@ async fn main()
         // update entities
         crop_grid.update(get_frame_time());
         player.update(get_frame_time());
+        crow.update(get_frame_time(), &crop_grid.crops);
 
         // draw entities to screen
         crop_grid.render(&seedling_t, &dry_t, &wet_t);
