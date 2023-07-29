@@ -11,10 +11,11 @@ const CROPS_PER_ROW: usize = 5;
 const GRID_PADDING: f32 = 22.0;
 
 /// structure which holds information about the space in the crop grid
+#[derive(Clone, Copy)]
 pub struct CropGridCell<'a>
 {
     pub pos: Vec2,
-    rect: Rect,
+    pub rect: Rect,
     water_level: f32,
     pub plant: Option<Plant<'a>>,
 }
@@ -210,6 +211,7 @@ impl<'a> CropGrid<'a>
 }
 
 /// structure which represents a plant type
+#[derive(Clone, Copy)]
 pub struct PlantType
 {
     name: &'static str,
@@ -244,6 +246,7 @@ impl PlantType
 }
 
 /// structure which represents a plant instance
+#[derive(Clone, Copy)]
 pub struct Plant<'a>
 {
     plant_type: &'a PlantType,

@@ -9,6 +9,7 @@ use macroquad::texture::*;
 use crate::CropGridCell;
 
 const REACH: f32 = 50.0;
+const GRAB_RAD: f32 = 0.5;
 
 /// describes a player's character
 pub struct Player
@@ -67,17 +68,18 @@ impl Player
 }
 
 /// describes a crow character
-pub struct Crow
+pub struct Crow<'a>
 {
+    flyaway: bool,
     speed: f32,
     pos: Vec2,
-    target: Option<Vec2>,
+    target: Option<CropGridCell<'a>>,
     rect: Rect,
     texture: Texture2D
 }
 
 /// functions specific to crow character
-impl Crow
+impl<'a> Crow<'a>
 {
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
@@ -89,6 +91,7 @@ impl Crow
 
         Self
         {
+            flyaway: false,
             speed,
             pos,
             target: None,
@@ -97,7 +100,7 @@ impl Crow
         }
     }
     
-    fn find_target(&self, crops: &Vec<CropGridCell>) -> Option<Vec2>
+    fn find_target(&self, crops: &Vec<CropGridCell<'a>>) -> Option<CropGridCell<'a>>
     {
         let mut save = 0;
         let mut count = 0;
@@ -117,21 +120,19 @@ impl Crow
 
         if index < 0
         {
-            None
+            return None;
         }
-        else
-        {
-            Some(crops[index as usize].pos)
-        }
+        
+        Some(crops[index as usize])
     }
 
     fn fly(&mut self, dt: f32)
     {
-        if let Some(t) = self.target
+        if let Some(target) = &self.target
         {
-            let heading = -(self.pos - t).normalize();
-            self.pos += heading * self.speed * dt;
-        };
+            let heading = -(self.pos - target.pos).normalize();
+            self.pos += heading *self.speed * dt;
+        }
     }
 
     pub fn get_rect(&self) -> Rect
@@ -139,24 +140,25 @@ impl Crow
         Rect::new(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
     }
 
-    pub fn update(&mut self, dt: f32, crops: &Vec<CropGridCell>)
+    pub fn update(&mut self, dt: f32, crops: &Vec<CropGridCell<'a>>)
     {
-        // check already targeted a plant
-        // TODO: implement way for crow to be scared away and interest timer
-        if matches!(
-            &self.target,
-            Some(target)
-            if (self.pos.x - target.x).abs() > 2.0 && (self.pos.y - target.y).abs() > 2.0
-        )
-        {
-            println!("Flying to {:?}", self.target);
-            self.fly(dt);
-        }
-        // otherwise, assume need to find a new plant
-        else
+        // check crow has not targeted a plant
+        if self.target.is_none()
         {
             self.target = self.find_target(crops);
-            println!("Chose plant at {:?}", self.target);
+        }
+        // otherwise, check crow needs to get closer to plant
+        else if matches!(
+            &self.target, Some(target)
+            if (self.pos.x - target.pos.x).abs() > GRAB_RAD
+                && (self.pos.y - target.pos.y).abs() > GRAB_RAD
+        )
+        {
+            self.fly(dt);
+        }
+        // otherwise, assume crow can grab plant from cell
+        else
+        {
         }
     }
 
