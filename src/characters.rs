@@ -6,10 +6,10 @@ use macroquad::prelude::Vec2;
 use macroquad::input::*;
 use macroquad::texture::*;
 
-use crate::CropGridCell;
+use crate::CropGrid;
 
 const REACH: f32 = 50.0;
-const GRAB_RAD: f32 = 0.5;
+const GRAB_RAD: f32 = 0.1;
 
 /// describes a player's character
 pub struct Player
@@ -68,18 +68,18 @@ impl Player
 }
 
 /// describes a crow character
-pub struct Crow<'a>
+pub struct Crow
 {
     flyaway: bool,
     speed: f32,
     pos: Vec2,
-    target: Option<CropGridCell<'a>>,
+    target: Option<Vec2>,
     rect: Rect,
     texture: Texture2D
 }
 
 /// functions specific to crow character
-impl<'a> Crow<'a>
+impl Crow
 {
     pub fn new(speed: f32, texture: Texture2D) -> Self
     {
@@ -100,7 +100,7 @@ impl<'a> Crow<'a>
         }
     }
     
-    fn find_target(&self, crops: &Vec<CropGridCell<'a>>) -> Option<CropGridCell<'a>>
+    fn find_target(&self, crop_grid: &CropGrid) -> Option<Vec2>
     {
         let mut save = 0;
         let mut count = 0;
@@ -109,8 +109,8 @@ impl<'a> Crow<'a>
 
         while count < 3 && index == -1
         {
-            save = rng.gen_range(0..crops.len());
-            if let Some(plant) = &crops[save].plant
+            save = rng.gen_range(0..crop_grid.crops.len());
+            if let Some(plant) = crop_grid.crops[save].plant
             {
                 index = save as i32;
             };
@@ -123,15 +123,20 @@ impl<'a> Crow<'a>
             return None;
         }
         
-        Some(crops[index as usize])
+        Some(crop_grid.crops[index as usize].pos)
     }
 
     fn fly(&mut self, dt: f32)
     {
-        if let Some(target) = &self.target
+        if let Some(target) = self.target
         {
-            let heading = -(self.pos - target.pos).normalize();
-            self.pos += heading *self.speed * dt;
+            let curr_speed = (
+                self.speed
+                * (self.pos.distance(target)
+                * GRAB_RAD)
+            ).clamp(0.0, self.speed);
+            let heading = -(self.pos - target).normalize();
+            self.pos += heading * curr_speed * dt;
         }
     }
 
@@ -140,25 +145,26 @@ impl<'a> Crow<'a>
         Rect::new(self.rect.x, self.rect.y, self.rect.w, self.rect.h)
     }
 
-    pub fn update(&mut self, dt: f32, crops: &Vec<CropGridCell<'a>>)
+    pub fn update(&mut self, dt: f32, crop_grid: &mut CropGrid)
     {
         // check crow has not targeted a plant
         if self.target.is_none()
         {
-            self.target = self.find_target(crops);
+            self.target = self.find_target(crop_grid);
         }
         // otherwise, check crow needs to get closer to plant
         else if matches!(
             &self.target, Some(target)
-            if (self.pos.x - target.pos.x).abs() > GRAB_RAD
-                && (self.pos.y - target.pos.y).abs() > GRAB_RAD
+            if self.pos.distance(*target) > GRAB_RAD
         )
         {
             self.fly(dt);
         }
         // otherwise, assume crow can grab plant from cell
-        else
+        else if let Some(target) = self.target
         {
+            crop_grid.steal_from_cell(target);
+            self.target = None;
         }
     }
 

@@ -131,7 +131,7 @@ async fn main()
         // update entities
         crop_grid.update(get_frame_time());
         player.update(get_frame_time());
-        crow.update(get_frame_time(), &crop_grid.crops);
+        crow.update(get_frame_time(), &mut crop_grid);
 
         // draw entities to screen
         crop_grid.render(&seedling_t, &dry_t, &wet_t);

@@ -34,23 +34,6 @@ impl<'a> CropGridCell<'a>
         }
     }
 
-    fn update(&mut self, dt: f32)
-    {
-        //if there is no plant, do nothing
-        if let Some(plant) = &mut self.plant
-        {
-            plant.update(dt, &mut self.water_level)
-        }
-    }
-
-    fn plant(&mut self, plant: &'a PlantType)
-    {
-        if self.plant.is_none()
-        {
-            self.plant = Some(Plant::new(plant));
-        }
-    }
-
     fn harvest(&mut self, score: &mut i32)
     {
         if let Some(plant) = &mut self.plant
@@ -61,6 +44,14 @@ impl<'a> CropGridCell<'a>
             {
                 self.plant = None;
             }
+        }
+    }
+
+    fn plant(&mut self, plant: &'a PlantType)
+    {
+        if self.plant.is_none()
+        {
+            self.plant = Some(Plant::new(plant));
         }
     }
 
@@ -96,6 +87,20 @@ impl<'a> CropGridCell<'a>
                 self.pos.x - (self.rect.w / 2.),
                 self.pos.y - (self.rect.h / 2.)
             );
+        }
+    }
+
+    fn steal(&mut self)
+    {
+        self.plant = None;
+    }
+
+    fn update(&mut self, dt: f32)
+    {
+        //if there is no plant, do nothing
+        if let Some(plant) = &mut self.plant
+        {
+            plant.update(dt, &mut self.water_level)
         }
     }
 
@@ -181,14 +186,6 @@ impl<'a> CropGrid<'a>
         }
     }
 
-    pub fn water_cell(&mut self, query: Rect, portion: f32)
-    {
-        if let Some(crop) = self.check_for_intersect(query)
-        {
-            crop.water(portion);
-        }
-    }
-
     pub fn update(&mut self, dt: f32)
     {
         for crop in &mut self.crops
@@ -206,6 +203,22 @@ impl<'a> CropGrid<'a>
         for crop in &self.crops
         {
             crop.render(seedling_t, dry_t, watered_t);
+        }
+    }
+
+    pub fn steal_from_cell(&mut self, check: Vec2)
+    {
+        if let Some(cell) = self.crops.iter_mut().find(|cell| check.eq(&cell.pos))
+        {
+            cell.steal();
+        }
+    }
+
+    pub fn water_cell(&mut self, query: Rect, portion: f32)
+    {
+        if let Some(crop) = self.check_for_intersect(query)
+        {
+            crop.water(portion);
         }
     }
 }
