@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use macroquad::experimental::animation::*;
-use macroquad::color::WHITE;
+use macroquad::color;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
 use macroquad::input::*;
@@ -9,6 +9,7 @@ use macroquad::texture::*;
 
 use crate::CropGrid;
 
+const SPRITE_DIM_32: f32 = 32.0;
 const REACH: f32 = 50.0;
 const GRAB_RAD: f32 = 0.1;
 
@@ -41,7 +42,7 @@ impl Player
     {
         let x = self.pos.x - (self.texture.width() / 2.0);
         let y = self.pos.y - (self.texture.height() / 2.0);
-        draw_texture(self.texture, x, y, WHITE);
+        draw_texture(self.texture, x, y, color::WHITE);
     }
 
     pub fn update(&mut self, dt: f32)
@@ -89,7 +90,7 @@ impl Crow
             macroquad::window::screen_width() / 2.0,
             macroquad::window::screen_height() / 2.0
         );
-        let rect = Rect::default();
+        let rect = Rect::new(pos.x, pos.y, SPRITE_DIM_32, SPRITE_DIM_32);
 
         let anim_dat = AnimatedSprite::new(
             32,
@@ -100,7 +101,7 @@ impl Crow
                     name: "idle".to_string(),
                     row: 0,
                     frames: 5,
-                    fps: 6
+                    fps: 4
                 }
             ],
             true
@@ -188,13 +189,13 @@ impl Crow
 
     pub fn render(&mut self)
     {
-        let x = self.pos.x - (self.texture.width() / 2.0);
-        let y = self.pos.y - (self.texture.height() / 2.0);
+        let x = self.pos.x - (self.rect.w / 2.0);
+        let y = self.pos.y - (self.rect.h / 2.0);
         draw_texture_ex(
             self.texture,
             x,
             y,
-            WHITE,
+            color::WHITE,
             DrawTextureParams
             {
                 source: Some(self.anim_dat.frame().source_rect),
