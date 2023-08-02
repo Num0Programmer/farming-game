@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use macroquad::experimental::animation::*;
 use macroquad::color::WHITE;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
@@ -75,7 +76,8 @@ pub struct Crow
     pos: Vec2,
     target: Option<Vec2>,
     rect: Rect,
-    texture: Texture2D
+    texture: Texture2D,
+    anim_dat: AnimatedSprite
 }
 
 /// functions specific to crow character
@@ -89,6 +91,21 @@ impl Crow
         );
         let rect = Rect::default();
 
+        let anim_dat = AnimatedSprite::new(
+            32,
+            32,
+            &[
+                Animation
+                {
+                    name: "idle".to_string(),
+                    row: 0,
+                    frames: 5,
+                    fps: 6
+                }
+            ],
+            true
+        );
+
         Self
         {
             flyaway: false,
@@ -96,7 +113,8 @@ impl Crow
             pos,
             target: None,
             rect,
-            texture
+            texture,
+            anim_dat
         }
     }
     
@@ -168,11 +186,23 @@ impl Crow
         }
     }
 
-    pub fn render(&self)
+    pub fn render(&mut self)
     {
         let x = self.pos.x - (self.texture.width() / 2.0);
         let y = self.pos.y - (self.texture.height() / 2.0);
-        draw_texture(self.texture, x, y, WHITE);
+        draw_texture_ex(
+            self.texture,
+            x,
+            y,
+            WHITE,
+            DrawTextureParams
+            {
+                source: Some(self.anim_dat.frame().source_rect),
+                ..Default::default()
+            }
+        );
+
+        self.anim_dat.update();
     }
 }
 

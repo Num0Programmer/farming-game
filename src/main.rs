@@ -45,7 +45,7 @@ async fn main()
 
     // init crows
     let mut crow = Crow::new(
-        120.0,
+        160.0,
         load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
     );
 
