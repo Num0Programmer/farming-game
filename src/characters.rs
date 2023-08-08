@@ -74,6 +74,7 @@ pub struct Crow
 {
     flyaway: bool,
     speed: f32,
+    vel: Vec2,
     pos: Vec2,
     target: Option<Vec2>,
     rect: Rect,
@@ -111,6 +112,7 @@ impl Crow
         {
             flyaway: false,
             speed,
+            vel: Vec2::ZERO,
             pos,
             target: None,
             rect,
@@ -154,8 +156,9 @@ impl Crow
                 * (self.pos.distance(target)
                 * GRAB_RAD)
             ).clamp(0.0, self.speed);
-            let heading = -(self.pos - target).normalize();
-            self.pos += heading * curr_speed * dt;
+
+            self.vel = -(self.pos - target).normalize() * curr_speed * dt;
+            self.pos += self.vel;
         }
     }
 
@@ -199,6 +202,7 @@ impl Crow
             DrawTextureParams
             {
                 source: Some(self.anim_dat.frame().source_rect),
+                flip_x: self.vel.x < 0.0,
                 ..Default::default()
             }
         );
