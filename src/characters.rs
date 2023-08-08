@@ -100,7 +100,7 @@ impl Crow
                 {
                     name: "idle".to_string(),
                     row: 0,
-                    frames: 5,
+                    frames: 4,
                     fps: 4
                 }
             ],
