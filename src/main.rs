@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad::rand::gen_range;
 
 pub mod characters;
 use characters::*;
@@ -19,6 +20,8 @@ async fn main()
 {
     // init game management
     let mut score = 0;
+
+    // init crop cells and grid
     let dry_t = load_texture(
         &(TILEMAP_PATH.to_owned() + "dry_soil.png")
     ).await.unwrap();
@@ -28,7 +31,6 @@ async fn main()
     let seedling_t = load_texture(
         &(PLANT_PATH.to_owned() + "seedling.png")
     ).await.unwrap();
-    // init crop grid
     let mut crop_grid = CropGrid::new(
         screen_width() / 4., screen_height() / 2.,
         400., 500.
@@ -46,6 +48,7 @@ async fn main()
     // init crows
     let mut crow = Crow::new(
         160.0,
+        Vec2::new(gen_range(0.0, screen_width()), -10.0),
         load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
     );
 

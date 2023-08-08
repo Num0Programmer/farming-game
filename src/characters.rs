@@ -1,10 +1,9 @@
-use rand::Rng;
-
-use macroquad::experimental::animation::*;
 use macroquad::color;
+use macroquad::experimental::animation::*;
+use macroquad::input::*;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
-use macroquad::input::*;
+use macroquad::rand::gen_range;
 use macroquad::texture::*;
 
 use crate::CropGrid;
@@ -85,14 +84,9 @@ pub struct Crow
 /// functions specific to crow character
 impl Crow
 {
-    pub fn new(speed: f32, texture: Texture2D) -> Self
+    pub fn new(speed: f32, pos: Vec2, texture: Texture2D) -> Self
     {
-        let pos = Vec2::new(
-            macroquad::window::screen_width() / 2.0,
-            macroquad::window::screen_height() / 2.0
-        );
         let rect = Rect::new(pos.x, pos.y, SPRITE_DIM_32, SPRITE_DIM_32);
-
         let anim_dat = AnimatedSprite::new(
             32,
             32,
@@ -126,11 +120,10 @@ impl Crow
         let mut save = 0;
         let mut count = 0;
         let mut index: i32 = -1;
-        let mut rng = rand::thread_rng();
 
         while count < 3 && index == -1
         {
-            save = rng.gen_range(0..crop_grid.crops.len());
+            save = gen_range(0, crop_grid.crops.len());
             if let Some(plant) = crop_grid.crops[save].plant
             {
                 index = save as i32;
