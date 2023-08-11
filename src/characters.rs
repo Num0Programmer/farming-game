@@ -75,7 +75,7 @@ pub struct Crow
     speed: f32,
     vel: Vec2,
     pos: Vec2,
-    target: Option<Vec2>,
+    target: Vec2,
     rect: Rect,
     texture: Texture2D,
     anim_dat: AnimatedSprite
@@ -108,14 +108,14 @@ impl Crow
             speed,
             vel: Vec2::ZERO,
             pos,
-            target: None,
+            target: Vec2::NAN,
             rect,
             texture,
             anim_dat
         }
     }
     
-    fn find_target(&self, crop_grid: &CropGrid) -> Option<Vec2>
+    fn find_target(&self, crop_grid: &CropGrid) -> Vec2
     {
         let mut save = 0;
         let mut count = 0;
@@ -134,25 +134,22 @@ impl Crow
 
         if index < 0
         {
-            return None;
+            return Vec2::NAN;
         }
         
-        Some(crop_grid.crops[index as usize].pos)
+        crop_grid.crops[index as usize].pos
     }
 
     fn fly(&mut self, dt: f32)
     {
-        if let Some(target) = self.target
-        {
-            let curr_speed = (
-                self.speed
-                * (self.pos.distance(target)
-                * GRAB_RAD)
-            ).clamp(0.0, self.speed);
+        let curr_speed = (
+            self.speed
+            * (self.pos.distance(self.target)
+            * GRAB_RAD)
+        ).clamp(0.0, self.speed);
 
-            self.vel = -(self.pos - target).normalize() * curr_speed * dt;
-            self.pos += self.vel;
-        }
+        self.vel = -(self.pos - self.target).normalize() * curr_speed * dt;
+        self.pos += self.vel;
     }
 
     pub fn get_rect(&self) -> Rect
@@ -163,23 +160,20 @@ impl Crow
     pub fn update(&mut self, dt: f32, crop_grid: &mut CropGrid)
     {
         // check crow has not targeted a plant
-        if self.target.is_none()
+        if self.target.is_nan()
         {
             self.target = self.find_target(crop_grid);
         }
         // otherwise, check crow needs to get closer to plant
-        else if matches!(
-            &self.target, Some(target)
-            if self.pos.distance(*target) > GRAB_RAD
-        )
+        else if self.pos.distance(self.target) > GRAB_RAD
         {
             self.fly(dt);
         }
         // otherwise, assume crow can grab plant from cell
-        else if let Some(target) = self.target
+        else
         {
-            crop_grid.steal_from_cell(target);
-            self.target = None;
+            crop_grid.steal_from_cell(self.target);
+            self.target = Vec2::NAN;
         }
     }
 
