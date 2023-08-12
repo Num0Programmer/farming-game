@@ -48,7 +48,10 @@ async fn main()
     // init crows
     let mut crow = Crow::new(
         160.0,
-        Vec2::new(gen_range(0.0, screen_width()), -10.0),
+        Vec2::new(
+            screen_width() + SCREEN_BORDER_EXT,
+            gen_range(-SCREEN_BORDER_EXT, screen_height() + SCREEN_BORDER_EXT)
+        ),
         load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
     );
 

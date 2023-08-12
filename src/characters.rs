@@ -2,13 +2,18 @@ use macroquad::color;
 use macroquad::experimental::animation::*;
 use macroquad::input::*;
 use macroquad::prelude::Rect;
+use macroquad::prelude::screen_width;
+use macroquad::prelude::screen_height;
 use macroquad::prelude::Vec2;
 use macroquad::rand::gen_range;
 use macroquad::texture::*;
 
 use crate::CropGrid;
 
+pub const SCREEN_BORDER_EXT: f32 = 25.0;
+
 const SPRITE_DIM_32: f32 = 32.0;
+
 const REACH: f32 = 50.0;
 const GRAB_RAD: f32 = 0.1;
 
@@ -142,14 +147,27 @@ impl Crow
 
     fn fly(&mut self, dt: f32)
     {
-        let curr_speed = (
-            self.speed
-            * (self.pos.distance(self.target)
-            * GRAB_RAD)
-        ).clamp(0.0, self.speed);
+        if (-SCREEN_BORDER_EXT <= self.pos.x
+                && self.pos.x <= screen_width() + SCREEN_BORDER_EXT)
+            && (-SCREEN_BORDER_EXT <= self.pos.y
+                  && self.pos.y <= screen_height() + SCREEN_BORDER_EXT)
+        {
+            self.pos += self.vel * dt;
+        }
+        else
+        {
+            self.pos.x = self.pos.x.clamp(
+                -SCREEN_BORDER_EXT + 1.0,
+                screen_width() + (SCREEN_BORDER_EXT - 1.0)
+            );
+            self.pos.y = self.pos.y.clamp(
+                -SCREEN_BORDER_EXT + 1.0,
+                screen_height() + (SCREEN_BORDER_EXT - 1.0)
+            );
 
-        self.vel = -(self.pos - self.target).normalize() * curr_speed * dt;
-        self.pos += self.vel;
+            self.flyaway = false;
+            self.vel = Vec2::ZERO;
+        }
     }
 
     pub fn get_rect(&self) -> Rect
@@ -159,22 +177,42 @@ impl Crow
 
     pub fn update(&mut self, dt: f32, crop_grid: &mut CropGrid)
     {
-        // check crow has not targeted a plant
-        if self.target.is_nan()
+        // check crow stole a crop
+        if self.flyaway
+        {
+            self.vel += 6.0; // scary magic number
+        }
+        // otherwise, check crow has not targeted a plant
+        else if self.target.is_nan()
         {
             self.target = self.find_target(crop_grid);
         }
-        // otherwise, check crow needs to get closer to plant
-        else if self.pos.distance(self.target) > GRAB_RAD
-        {
-            self.fly(dt);
-        }
-        // otherwise, assume crow can grab plant from cell
-        else
+        // otherwise, check close enough to steal plant
+        else if self.pos.distance(self.target) <= GRAB_RAD
         {
             crop_grid.steal_from_cell(self.target);
+
+            // choose location off screen
             self.target = Vec2::NAN;
+            self.vel = Vec2::new(
+                gen_range(-1.0, 1.0), gen_range(-1.0, 1.0)
+            ) * self.speed;
+            self.flyaway = true;
         }
+        // otherwise, assume velocity needs to be calculated
+        else
+        {
+            // throttle speed based on dist from target
+            let curr_speed = (
+                self.speed
+                * (self.pos.distance(self.target)
+                * GRAB_RAD)
+            ).clamp(0.0, self.speed);
+
+            self.vel = -(self.pos - self.target).normalize() * curr_speed;
+        }
+
+        self.fly(dt);
     }
 
     pub fn render(&mut self)
