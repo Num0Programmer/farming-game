@@ -1,11 +1,7 @@
 use macroquad::color::WHITE;
-use macroquad::color::RED;
 use macroquad::prelude::Rect;
 use macroquad::prelude::Vec2;
-use macroquad::shapes::draw_rectangle;
-use macroquad::shapes::draw_rectangle_lines;
 use macroquad::texture::*;
-use macroquad::window::*;
 
 // expected size of sprite -- useful when crop grid becomes a tilemap
 const SPRITE_DIM: f32 = 32.0;
@@ -15,12 +11,13 @@ const CROPS_PER_ROW: usize = 5;
 const GRID_PADDING: f32 = 22.0;
 
 /// structure which holds information about the space in the crop grid
-struct CropGridCell<'a>
+#[derive(Clone, Copy)]
+pub struct CropGridCell<'a>
 {
-    pos: Vec2,
-    rect: Rect,
+    pub pos: Vec2,
+    pub rect: Rect,
     water_level: f32,
-    plant: Option<Plant<'a>>,
+    pub plant: Option<Plant<'a>>,
 }
 
 impl<'a> CropGridCell<'a>
@@ -37,23 +34,6 @@ impl<'a> CropGridCell<'a>
         }
     }
 
-    fn update(&mut self, dt: f32)
-    {
-        //if there is no plant, do nothing
-        if let Some(plant) = &mut self.plant
-        {
-            plant.update(dt, &mut self.water_level)
-        }
-    }
-
-    fn plant(&mut self, plant: &'a PlantType)
-    {
-        if self.plant.is_none()
-        {
-            self.plant = Some(Plant::new(plant));
-        }
-    }
-
     fn harvest(&mut self, score: &mut i32)
     {
         if let Some(plant) = &mut self.plant
@@ -64,6 +44,14 @@ impl<'a> CropGridCell<'a>
             {
                 self.plant = None;
             }
+        }
+    }
+
+    fn plant(&mut self, plant: &'a PlantType)
+    {
+        if self.plant.is_none()
+        {
+            self.plant = Some(Plant::new(plant));
         }
     }
 
@@ -102,6 +90,20 @@ impl<'a> CropGridCell<'a>
         }
     }
 
+    fn steal(&mut self)
+    {
+        self.plant = None;
+    }
+
+    fn update(&mut self, dt: f32)
+    {
+        //if there is no plant, do nothing
+        if let Some(plant) = &mut self.plant
+        {
+            plant.update(dt, &mut self.water_level)
+        }
+    }
+
     fn water(&mut self, portion: f32)
     {
         if self.water_level <= 0.0
@@ -117,7 +119,7 @@ pub struct CropGrid<'a>
     pos: Vec2,
     w: f32,
     h: f32,
-    crops: Vec<CropGridCell<'a>>
+    pub crops: Vec<CropGridCell<'a>>
 }
 
 impl<'a> CropGrid<'a>
@@ -184,14 +186,6 @@ impl<'a> CropGrid<'a>
         }
     }
 
-    pub fn water_cell(&mut self, query: Rect, portion: f32)
-    {
-        if let Some(crop) = self.check_for_intersect(query)
-        {
-            crop.water(portion);
-        }
-    }
-
     pub fn update(&mut self, dt: f32)
     {
         for crop in &mut self.crops
@@ -211,9 +205,26 @@ impl<'a> CropGrid<'a>
             crop.render(seedling_t, dry_t, watered_t);
         }
     }
+
+    pub fn steal_from_cell(&mut self, check: Vec2)
+    {
+        if let Some(cell) = self.crops.iter_mut().find(|cell| check.eq(&cell.pos))
+        {
+            cell.steal();
+        }
+    }
+
+    pub fn water_cell(&mut self, query: Rect, portion: f32)
+    {
+        if let Some(crop) = self.check_for_intersect(query)
+        {
+            crop.water(portion);
+        }
+    }
 }
 
 /// structure which represents a plant type
+#[derive(Clone, Copy)]
 pub struct PlantType
 {
     name: &'static str,
@@ -248,6 +259,7 @@ impl PlantType
 }
 
 /// structure which represents a plant instance
+#[derive(Clone, Copy)]
 pub struct Plant<'a>
 {
     plant_type: &'a PlantType,

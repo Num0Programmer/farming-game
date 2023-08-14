@@ -1,7 +1,8 @@
 use macroquad::prelude::*;
+use macroquad::rand::gen_range;
 
 pub mod characters;
-use characters::Player;
+use characters::*;
 
 pub mod plants;
 use plants::*;
@@ -9,6 +10,7 @@ use plants::*;
 pub mod tools;
 use tools::*;
 
+const CHARACTER_PATH: &str = "assets/characters/";
 const PLANT_PATH: &str = "assets/plants/";
 const TILEMAP_PATH: &str = "assets/tilemap/";
 const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
@@ -18,6 +20,8 @@ async fn main()
 {
     // init game management
     let mut score = 0;
+
+    // init crop cells and grid
     let dry_t = load_texture(
         &(TILEMAP_PATH.to_owned() + "dry_soil.png")
     ).await.unwrap();
@@ -27,7 +31,6 @@ async fn main()
     let seedling_t = load_texture(
         &(PLANT_PATH.to_owned() + "seedling.png")
     ).await.unwrap();
-    // init crop grid
     let mut crop_grid = CropGrid::new(
         screen_width() / 4., screen_height() / 2.,
         400., 500.
@@ -35,9 +38,30 @@ async fn main()
 
     // init player and tools
     let mut player = Player::new(
-        120.0, load_texture("assets/place_holder.png").await.unwrap()
+        120.0,
+        load_texture(
+            &(CHARACTER_PATH.to_owned() + "place_holder.png")
+        ).await.unwrap()
     );
     let water_can = WaterCan::new();
+
+    // init crows
+    let mut crow_1 = Crow::new(
+        160.0,
+        Vec2::new(
+            screen_width() + SCREEN_BORDER_EXT,
+            gen_range(-SCREEN_BORDER_EXT, screen_height() + SCREEN_BORDER_EXT)
+        ),
+        load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
+    );
+    let mut crow_2 = Crow::new(
+        160.0,
+        Vec2::new(
+            screen_width() + SCREEN_BORDER_EXT,
+            gen_range(-SCREEN_BORDER_EXT, screen_height() + SCREEN_BORDER_EXT)
+        ),
+        load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
+    );
 
     // init plants
     let potato = PlantType::new(
@@ -121,10 +145,14 @@ async fn main()
         // update entities
         crop_grid.update(get_frame_time());
         player.update(get_frame_time());
+        crow_1.update(get_frame_time(), &mut crop_grid);
+        crow_2.update(get_frame_time(), &mut crop_grid);
 
         // draw entities to screen
         crop_grid.render(&seedling_t, &dry_t, &wet_t);
         player.render();
+        crow_1.render();
+        crow_2.render();
 
         next_frame().await
     }
