@@ -46,7 +46,15 @@ async fn main()
     let water_can = WaterCan::new();
 
     // init crows
-    let mut crow = Crow::new(
+    let mut crow_1 = Crow::new(
+        160.0,
+        Vec2::new(
+            screen_width() + SCREEN_BORDER_EXT,
+            gen_range(-SCREEN_BORDER_EXT, screen_height() + SCREEN_BORDER_EXT)
+        ),
+        load_texture(&(CHARACTER_PATH.to_owned() + "crow.png")).await.unwrap()
+    );
+    let mut crow_2 = Crow::new(
         160.0,
         Vec2::new(
             screen_width() + SCREEN_BORDER_EXT,
@@ -137,12 +145,14 @@ async fn main()
         // update entities
         crop_grid.update(get_frame_time());
         player.update(get_frame_time());
-        crow.update(get_frame_time(), &mut crop_grid);
+        crow_1.update(get_frame_time(), &mut crop_grid);
+        crow_2.update(get_frame_time(), &mut crop_grid);
 
         // draw entities to screen
         crop_grid.render(&seedling_t, &dry_t, &wet_t);
         player.render();
-        crow.render();
+        crow_1.render();
+        crow_2.render();
 
         next_frame().await
     }

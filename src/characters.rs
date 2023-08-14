@@ -20,7 +20,7 @@ const REACH: f32 = 50.0;
 // crow constants
 const GRAB_RAD: f32 = 0.1;
 const LOWER_COOLDOWN: f32 = 12.0; // seconds
-const UPPER_COOLDOWN: f32 = 60.0; // seconds - 1 mins
+const UPPER_COOLDOWN: f32 = 180.0; // seconds - 2 mins
 
 /// describes a player's character
 pub struct Player
@@ -120,7 +120,7 @@ impl Crow
             vel: Vec2::ZERO,
             pos,
             target: Vec2::NAN,
-            targeting_cooldown: 10.0,
+            targeting_cooldown: gen_range(LOWER_COOLDOWN, UPPER_COOLDOWN),
             rect,
             texture,
             anim_dat
