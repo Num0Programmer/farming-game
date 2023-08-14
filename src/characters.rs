@@ -10,12 +10,17 @@ use macroquad::texture::*;
 
 use crate::CropGrid;
 
+// windowing constants
 pub const SCREEN_BORDER_EXT: f32 = 25.0;
-
 const SPRITE_DIM_32: f32 = 32.0;
 
+// player constants
 const REACH: f32 = 50.0;
+
+// crow constants
 const GRAB_RAD: f32 = 0.1;
+const LOWER_COOLDOWN: f32 = 12.0; // seconds
+const UPPER_COOLDOWN: f32 = 60.0; // seconds - 1 mins
 
 /// describes a player's character
 pub struct Player
@@ -81,6 +86,7 @@ pub struct Crow
     vel: Vec2,
     pos: Vec2,
     target: Vec2,
+    targeting_cooldown: f32,
     rect: Rect,
     texture: Texture2D,
     anim_dat: AnimatedSprite
@@ -114,6 +120,7 @@ impl Crow
             vel: Vec2::ZERO,
             pos,
             target: Vec2::NAN,
+            targeting_cooldown: 10.0,
             rect,
             texture,
             anim_dat
@@ -182,6 +189,11 @@ impl Crow
         {
             self.vel += 6.0; // scary magic number
         }
+        // otherwise, check crow is waiting to target
+        else if self.targeting_cooldown > 0.0
+        {
+            self.targeting_cooldown -= dt;
+        }
         // otherwise, check crow has not targeted a plant
         else if self.target.is_nan()
         {
@@ -198,8 +210,10 @@ impl Crow
                 gen_range(-1.0, 1.0), gen_range(-1.0, 1.0)
             ) * self.speed;
             self.flyaway = true;
+
+            self.targeting_cooldown = gen_range(LOWER_COOLDOWN, UPPER_COOLDOWN);
         }
-        // otherwise, assume velocity needs to be calculated
+        // otherwise, assume moving toward target
         else
         {
             // throttle speed based on dist from target
@@ -219,6 +233,7 @@ impl Crow
     {
         let x = self.pos.x - (self.rect.w / 2.0);
         let y = self.pos.y - (self.rect.h / 2.0);
+
         draw_texture_ex(
             self.texture,
             x,
