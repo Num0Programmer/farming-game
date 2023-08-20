@@ -10,6 +10,9 @@ use plants::*;
 pub mod tools;
 use tools::*;
 
+pub mod tilemap;
+use tilemap::*;
+
 const CHARACTER_PATH: &str = "assets/characters/";
 const PLANT_PATH: &str = "assets/plants/";
 const TILEMAP_PATH: &str = "assets/tilemap/";
