@@ -45,9 +45,23 @@ impl TileMap
         let map = self.map.as_ref().unwrap();
         let set = self.tile_set.as_ref().unwrap();
 
-        for i in map
+        let mut map_idx: usize;
+
+        for row in 0..self.height
         {
-            draw_texture(set[*i], 45.0, 45.0, WHITE);
+            for col in 0..self.width
+            {
+                map_idx = (row * self.width + col) as usize;
+
+                println!("map index = {}", map_idx);
+                
+                draw_texture(
+                    set[map[map_idx]],
+                    (self.tile_size * col) as f32,
+                    (self.tile_size * row) as f32,
+                    WHITE
+                );
+            }
         }
     }
 }
