@@ -22,6 +22,7 @@ const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
 async fn main()
 {
     // init game management
+    let tilemap = Tilemap::new(16, 16, DEFAULT_TILE_SIZE, Vec::new());
     let mut score = 0;
 
     // init crop cells and grid
@@ -93,7 +94,9 @@ async fn main()
     );
 
     let mut selected_plant = &potato;
-    loop // game loop
+
+    // game loop
+    loop
     {
         if is_key_pressed(KeyCode::Escape)
         {

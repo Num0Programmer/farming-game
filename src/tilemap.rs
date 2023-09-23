@@ -4,19 +4,21 @@ use macroquad::prelude::Texture2D;
 pub const DEFAULT_TILE_SIZE: u32 = 32;
 
 /// describes the arrangement of sprites representing the world
-pub struct Tilemap<'a>
+pub struct Tilemap
 {
     width: u32,
     height: u32,
     tile_size: u32,
-    map: &'a [Texture2D]
+    map: Option<Vec<usize>>
 }
 
-impl<'a> Tilemap<'a>
+impl Tilemap
 {
     pub fn new(
-        map: &'a mut [Texture2D],
-        width: u32, height: u32, tile_size: u32
+        width: u32,
+        height: u32,
+        tile_size: u32,
+        map: Vec<usize>
     ) -> Self
     {
         Self
@@ -24,8 +26,12 @@ impl<'a> Tilemap<'a>
             width,
             height,
             tile_size,
-            map
+            map: Some(map)
         }
     }
-}
 
+    pub fn draw(&self)
+    {
+        println!("Tilemap drawn!");
+    }
+}
