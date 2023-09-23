@@ -160,4 +160,3 @@ async fn main()
         next_frame().await
     }
 }
-
