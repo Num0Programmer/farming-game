@@ -1,17 +1,14 @@
 use macroquad::prelude::*;
 use macroquad::rand::gen_range;
+mod characters;
+mod plants;
+mod tilemap;
+mod tools;
 
-pub mod characters;
 use characters::*;
-
-pub mod plants;
 use plants::*;
-
-pub mod tools;
-use tools::*;
-
-pub mod tilemap;
 use tilemap::*;
+use tools::*;
 
 const CHARACTER_PATH: &str = "assets/characters/";
 const PLANT_PATH: &str = "assets/plants/";
@@ -22,7 +19,7 @@ const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
 async fn main()
 {
     // init game management
-    let tilemap = Tilemap::new(16, 16, DEFAULT_TILE_SIZE, Vec::new());
+    let tilemap = TileMap::new(16, 16, DEFAULT_TILE_SIZE, TileSet::new(), Vec::new());
     let mut score = 0;
 
     // init crop cells and grid
