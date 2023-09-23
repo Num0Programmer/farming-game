@@ -19,10 +19,9 @@ const GROUND: Color = Color::new(0.212, 0.337, 0.173, 1.0);
 async fn main()
 {
     // init game management
-    let tilemap = TileMap::new(16, 16, DEFAULT_TILE_SIZE, TileSet::new(), Vec::new());
     let mut score = 0;
 
-    // init crop cells and grid
+    // buffer tile textures
     let dry_t = load_texture(
         &(TILEMAP_PATH.to_owned() + "dry_soil.png")
     ).await.unwrap();
@@ -32,10 +31,11 @@ async fn main()
     let seedling_t = load_texture(
         &(PLANT_PATH.to_owned() + "seedling.png")
     ).await.unwrap();
-    let mut crop_grid = CropGrid::new(
-        screen_width() / 4., screen_height() / 2.,
-        400., 500.
-    );
+
+    // init tilemap
+    let tile_set = vec![dry_t, wet_t, seedling_t];
+    let map = vec![0, 0, 0, 1, 1, 1];
+    let tilemap = TileMap::new(16, 16, DEFAULT_TILE_SIZE, tile_set, map);
 
     // init player and tools
     let mut player = Player::new(
@@ -126,33 +126,24 @@ async fn main()
         // check for plant button
         if is_key_pressed(KeyCode::J)
         {
-            crop_grid.plant_to_cell(selected_plant, player.get_rect());
         }
         // otherwise, check for pull button
         else if is_key_pressed(KeyCode::K)
         {
-            crop_grid.pull_from_cell(player.get_rect(), &mut score);
-            println!("Score: {}", score);
         }
         else if is_key_pressed(KeyCode::H)
         {
-            crop_grid.harvest_from_cell(player.get_rect(), &mut score);
-            println!("Score: {}", score);
         }
         // otherwise, check for water button
         else if is_key_pressed(KeyCode::L)
         {
-            crop_grid.water_cell(player.get_rect(), water_can.get_portion());
         }
 
         // update entities
-        crop_grid.update(get_frame_time());
         player.update(get_frame_time());
-        crow_1.update(get_frame_time(), &mut crop_grid);
-        crow_2.update(get_frame_time(), &mut crop_grid);
 
         // draw entities to screen
-        crop_grid.render(&seedling_t, &dry_t, &wet_t);
+        tilemap.render();
         player.render();
         crow_1.render();
         crow_2.render();

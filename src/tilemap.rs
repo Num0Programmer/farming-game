@@ -1,10 +1,12 @@
-use macroquad::prelude::Texture2D;
+use macroquad::color::WHITE;
+use macroquad::texture::*;
 
 
 /// constants for working with the tilemap
 pub const DEFAULT_TILE_SIZE: u32 = 32;
 
 
+/// provides quick access to tile textures
 pub type TileSet = Vec<Texture2D>;
 
 /// describes the arrangement of sprites representing the world
@@ -37,8 +39,15 @@ impl TileMap
         }
     }
 
-    pub fn draw(&self)
+    pub fn render(&self)
     {
-        println!("TileMap drawn!");
+        // grab refs to tile set and map
+        let map = self.map.as_ref().unwrap();
+        let set = self.tile_set.as_ref().unwrap();
+
+        for i in map
+        {
+            draw_texture(set[*i], 45.0, 45.0, WHITE);
+        }
     }
 }
