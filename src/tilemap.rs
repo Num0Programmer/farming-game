@@ -52,8 +52,6 @@ impl TileMap
             for col in 0..self.width
             {
                 map_idx = (row * self.width + col) as usize;
-
-                println!("map index = {}", map_idx);
                 
                 draw_texture(
                     set[map[map_idx]],
