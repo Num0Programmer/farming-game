@@ -1,10 +1,13 @@
-use macroquad::prelude::*;
-use macroquad::rand::gen_range;
 mod characters;
 mod plants;
 mod tilemap;
 mod tools;
 
+// external libraries
+use macroquad::prelude::*;
+use macroquad::rand::gen_range;
+
+// custom libraries
 use characters::*;
 use plants::*;
 use tilemap::*;
@@ -108,27 +111,6 @@ async fn main()
 
         clear_background(GROUND);
 
-        // check for potato select
-        if is_key_pressed(KeyCode::Key1)
-        {
-            selected_plant = &potato;
-        }
-        // otherwise, check for carrot select
-        else if is_key_pressed(KeyCode::Key2)
-        {
-            selected_plant = &carrot;
-        }
-        // otherwise, check for beet select
-        else if is_key_pressed(KeyCode::Key3)
-        {
-            selected_plant = &beet;
-        }
-        // otherwise, check for tomato select
-        else if is_key_pressed(KeyCode::Key4)
-        {
-            selected_plant = &tomato;
-        }
-
         // check for plant button
         if is_key_pressed(KeyCode::J)
         {
@@ -149,10 +131,10 @@ async fn main()
         player.update(get_frame_time());
 
         // draw entities to screen
-        tilemap.render();
         player.render();
         crow_1.render();
         crow_2.render();
+        tilemap.render();
 
         next_frame().await
     }

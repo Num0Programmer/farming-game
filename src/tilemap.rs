@@ -12,11 +12,18 @@ pub type TileSet = Vec<Texture2D>;
 /// describes the arrangement of sprites representing the world
 pub struct TileMap
 {
+    /// extent of tile map on x-axis
     width: u32,
+    /// extent of tile map on y-axis
     height: u32,
+    /// dimension of tiles
     tile_size: u32,
+    /// tiles which will be drawn to the screen
     tile_set: Option<TileSet>,
-    map: Option<Vec<usize>>
+    /// mapping of tiles to positions in tile map
+    map: Option<Vec<usize>>,
+    /// pre-rendered map to speed up draw call
+    i_map: Image
 }
 
 impl TileMap
@@ -29,37 +36,42 @@ impl TileMap
         map: Vec<usize>
     ) -> Self
     {
+        let mut i_map = Image::gen_image_color(
+            width as u16,
+            height as u16,
+            WHITE
+        );
+        let i_map_data = i_map.get_image_data_mut();
+
+        let mut i_map_idx: usize;
+
+        for row in 0..height
+        {
+            for col in 0..width
+            {
+                i_map_idx = (row * width + col) as usize;
+                i_map_data[i_map_idx] = [255, 0, 0, 255];
+            }
+        }
+        
         Self
         {
             width,
             height,
             tile_size,
             tile_set: Some(tile_set),
-            map: Some(map)
+            map: Some(map),
+            i_map
         }
     }
 
     pub fn render(&self)
     {
-        // grab refs to tile set and map
-        let map = self.map.as_ref().unwrap();
-        let set = self.tile_set.as_ref().unwrap();
-
-        let mut map_idx: usize;
-
-        for row in 0..self.height
-        {
-            for col in 0..self.width
-            {
-                map_idx = (row * self.width + col) as usize;
-                
-                draw_texture(
-                    set[map[map_idx]],
-                    (self.tile_size * col) as f32,
-                    (self.tile_size * row) as f32,
-                    WHITE
-                );
-            }
-        }
+        draw_texture(
+            Texture2D::from_image(&self.i_map),
+            self.width as f32,
+            self.height as f32,
+            WHITE
+        );
     }
 }
